@@ -1,0 +1,40 @@
+THE SMILING WORM — PRODUCT DATA NOW IN index.html
+
+The complete storefront layout is unchanged.
+
+IMPORTANT:
+All 150 product data slots have been moved OUT OF app.js and INTO index.html.
+
+Open index.html and search for:
+  MANUAL PRODUCT DATA — EDIT ALL 150 PRODUCTS HERE
+
+Each product object contains:
+- id
+- category
+- name
+- description
+- shortDescription
+- price
+- originalPrice
+- discount
+- images
+- stock
+- sku
+- rating
+- reviews
+- badge
+- tags
+- featured / bestseller / newArrival
+- emoji
+- subcat
+
+To add a real product:
+1. Change the product name.
+2. Change the description.
+3. Change price / originalPrice / discount.
+4. Change the image path in the `images` array.
+5. Replace the placeholder image in assets/images/products/.
+6. Update any optional metadata as needed.
+
+app.js now contains the store functionality only; it no longer contains the 150
+product catalogue definitions.

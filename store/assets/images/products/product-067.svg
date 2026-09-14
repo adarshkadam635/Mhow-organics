@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+<rect width="900" height="900" fill="#eef7e9"/>
+<rect x="35" y="35" width="830" height="830" rx="28" fill="#fffdf8" stroke="#d9e6d6" stroke-width="4"/>
+<text x="450" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" fill="#52745a">ADD PRODUCT IMAGE</text>
+<text x="450" y="452" text-anchor="middle" font-family="Arial, sans-serif" font-size="21" fill="#75877b">Replace product-XXX.svg with your real product photo</text>
+</svg>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Mhow Organics Admin</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="app">
+      <section class="login" id="login">
+        <div class="brand-mark">MO</div>
+        <p class="eyebrow">Admin access</p>
+        <h1>Sign in</h1>
+        <p class="muted">Use your Mhow Organics admin credentials.</p>
+
+        <form id="loginForm" novalidate>
+          <label>
+            Username
+            <input
+              id="username"
+              type="text"
+              name="username"
+              value="AdminMO"
+              autocomplete="username"
+              required
+            />
+          </label>
+
+          <label>
+            Password
+            <input
+              id="password"
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+
+          <button type="submit">Login</button>
+          <p id="loginError" class="error" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="dashboard" id="dashboard" hidden>
+        <header>
+          <div class="admin-branding">
+            <img
+              src="../assets/images/Mhow_Organics_-removebg-preview.png"
+              alt="Mhow Organics logo"
+            />
+            <span class="brand-divider"></span>
+            <img
+              src="../assets/images/The_Smiling_WOrm_-removebg-preview.png"
+              alt="The Smiling Worm logo"
+            />
+          </div>
+          <div>
+            <p class="eyebrow">Mhow Organics · The Smiling Worm</p>
+            <h1>Operations dashboard</h1>
+            <p class="muted">Manage enquiries, orders and store products.</p>
+          </div>
+          <div class="header-actions">
+            <button class="ghost" data-download="orders">Download orders</button
+            ><button class="ghost" data-download="inventory">
+              Download inventory
+            </button
+            ><button class="ghost" id="logoutBtn" type="button">Logout</button>
+          </div>
+        </header>
+        <nav class="tabs">
+          <button class="active" data-tab="overview">Overview</button
+          ><button data-tab="products">Products</button
+          ><button data-tab="enquiries">Enquiries</button
+          ><button data-tab="orders">Orders</button>
+        </nav>
+        <div id="content"><p class="muted">Loading dashboard...</p></div>
+      </section>
+    </main>
+    <script src="app.js?v=orders-loader"></script>
+  </body>
+</html>

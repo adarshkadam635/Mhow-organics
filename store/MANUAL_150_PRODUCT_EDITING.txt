@@ -1,0 +1,44 @@
+THE SMILING WORM — 150 PRODUCT MANUAL-ENTRY VERSION
+
+The existing index.html storefront, CSS, navigation, search, cart, wishlist,
+account, pages and footer are preserved.
+
+PRODUCT DATA
+------------
+All 150 products are now explicit manual slots in app.js inside makeProducts().
+
+Search app.js for:
+  PRODUCT 001
+  PRODUCT 002
+  ...
+  PRODUCT 150
+
+For every slot you can manually edit:
+- Product name
+- Product description
+- Price
+- Product image path
+- Category/subcategory
+- Stock and optional metadata
+
+IMAGES
+------
+Default image slots:
+assets/images/products/product-001.svg
+...
+assets/images/products/product-150.svg
+
+Replace each placeholder with your own JPG, PNG or WebP and update the
+image path on that product's `add(...)` line.
+
+CATEGORY TOTALS
+---------------
+Organic Fertilizer: 5
+Pest & Disease Control: 5
+Wooden Planters: 25
+Metallic Planters: 25
+Office Gifts: 25
+Premium Plastic Planters: 25
+Garden Tools: 25
+Combo Deals: 15
+TOTAL: 150

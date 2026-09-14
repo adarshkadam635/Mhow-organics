@@ -392,4 +392,8 @@ app.patch("/api/orders/:id", auth, (req, res) => {
 
 app.use(express.static(ROOT));
 app.get("/admin", (_req, res) => res.sendFile(path.join(ROOT, "admin", "index.html")));
-app.listen(PORT, () => console.log(`Mhow Organics running at http://localhost:${PORT}`));
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Mhow Organics running at http://localhost:${PORT}`));
+}
+
+module.exports = app;

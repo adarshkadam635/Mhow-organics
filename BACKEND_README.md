@@ -21,6 +21,8 @@ The first run creates `data/products.json` from `store/product_inventory.csv`, p
 ## API areas
 
 - `POST /api/auth/login` signs an admin in.
+- `POST /api/store/auth/register` / `POST /api/store/auth/login` let customers create a store account and sign in from the storefront's Account page.
+- `GET /api/store/accounts` lists every registered customer account (name, email, phone, address) for the admin panel's Customers tab (admin token required).
 - `GET /api/products` powers the store catalog.
 - `PUT /api/products/:id` updates a product (admin token required).
 - `POST /api/enquiries` receives contact and franchise submissions.

@@ -31,14 +31,26 @@ assets/images/products/product-150.svg
 Replace each placeholder with your own JPG, PNG or WebP and update the
 image path on that product's `add(...)` line.
 
-CATEGORY TOTALS
+CATEGORY TOTALS (updated for the Plants / Pots & Planters / Tools & Accessories /
+Stands / Plant Care / Seeds taxonomy)
 ---------------
-Organic Fertilizer: 5
-Pest & Disease Control: 5
-Wooden Planters: 25
-Metallic Planters: 25
-Office Gifts: 25
-Premium Plastic Planters: 25
-Garden Tools: 25
-Combo Deals: 15
+Plant Care > Organic Fertilizer: 5
+Plant Care > Pest & Disease Control: 5
+Pots & Planters > Wooden Planters: 25
+Pots & Planters > Metallic Planters: 15
+Pots & Planters > Premium Plastic Planters: 20
+Pots & Planters > Office Gifts: 15
+Stands > Metal Stands: 10
+Stands > Wooden Stands: 5
+Plants > Indoor Plants: 5
+Plants > Outdoor Plants: 5
+Tools & Accessories > Garden Tools: 20
+Seeds > Vegetable Seeds: 5
+Seeds > Flower Seeds: 5
+Combo Deals (promo-only, not in main nav): 10
 TOTAL: 150
+
+Live product data is served from data/products.json (edit products through the
+admin panel's Products tab, including the new Subcategory field) or reseeded
+from store/product_inventory.csv. The PRODUCTS array in index.html is a
+client-side fallback only and is overwritten by the live API on page load.

@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "category": "Fertilizers",
+    "category": "Plant Care",
     "subcategory": "Organic Fertilizer",
     "name": "Vermi compost",
     "image": "/uploads/products/product-1.png",
@@ -15,7 +15,7 @@
   },
   {
     "id": "2",
-    "category": "Fertilizers",
+    "category": "Plant Care",
     "subcategory": "Organic Fertilizer",
     "name": "Epsom salt",
     "image": "/uploads/products/product-2.png",
@@ -27,7 +27,7 @@
   },
   {
     "id": "3",
-    "category": "Fertilizers",
+    "category": "Plant Care",
     "subcategory": "Organic Fertilizer",
     "name": "Humic",
     "image": "/uploads/products/product-3.png",
@@ -39,7 +39,7 @@
   },
   {
     "id": "4",
-    "category": "Fertilizers",
+    "category": "Plant Care",
     "subcategory": "Organic Fertilizer",
     "name": "Fertilizer Product 04",
     "image": "assets/images/products/product-004.svg",
@@ -51,7 +51,7 @@
   },
   {
     "id": "5",
-    "category": "Fertilizers",
+    "category": "Plant Care",
     "subcategory": "Organic Fertilizer",
     "name": "Fertilizer Product 05",
     "image": "assets/images/products/product-005.svg",
@@ -63,7 +63,7 @@
   },
   {
     "id": "6",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 01",
     "image": "assets/images/products/product-006.svg",
@@ -75,7 +75,7 @@
   },
   {
     "id": "7",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 02",
     "image": "assets/images/products/product-007.svg",
@@ -87,7 +87,7 @@
   },
   {
     "id": "8",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 03",
     "image": "assets/images/products/product-008.svg",
@@ -99,7 +99,7 @@
   },
   {
     "id": "9",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 04",
     "image": "assets/images/products/product-009.svg",
@@ -111,7 +111,7 @@
   },
   {
     "id": "10",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 05",
     "image": "assets/images/products/product-010.svg",
@@ -125,7 +125,7 @@
   },
   {
     "id": "11",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 06",
     "image": "assets/images/products/product-011.svg",
@@ -137,7 +137,7 @@
   },
   {
     "id": "12",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 07",
     "image": "assets/images/products/product-012.svg",
@@ -149,7 +149,7 @@
   },
   {
     "id": "13",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 08",
     "image": "assets/images/products/product-013.svg",
@@ -161,7 +161,7 @@
   },
   {
     "id": "14",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 09",
     "image": "assets/images/products/product-014.svg",
@@ -173,7 +173,7 @@
   },
   {
     "id": "15",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 10",
     "image": "assets/images/products/product-015.svg",
@@ -185,7 +185,7 @@
   },
   {
     "id": "16",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 11",
     "image": "assets/images/products/product-016.svg",
@@ -197,7 +197,7 @@
   },
   {
     "id": "17",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 12",
     "image": "assets/images/products/product-017.svg",
@@ -209,7 +209,7 @@
   },
   {
     "id": "18",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 13",
     "image": "assets/images/products/product-018.svg",
@@ -221,7 +221,7 @@
   },
   {
     "id": "19",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 14",
     "image": "assets/images/products/product-019.svg",
@@ -233,7 +233,7 @@
   },
   {
     "id": "20",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 15",
     "image": "assets/images/products/product-020.svg",
@@ -245,7 +245,7 @@
   },
   {
     "id": "21",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 16",
     "image": "assets/images/products/product-021.svg",
@@ -257,7 +257,7 @@
   },
   {
     "id": "22",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 17",
     "image": "assets/images/products/product-022.svg",
@@ -269,7 +269,7 @@
   },
   {
     "id": "23",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 18",
     "image": "assets/images/products/product-023.svg",
@@ -281,7 +281,7 @@
   },
   {
     "id": "24",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 19",
     "image": "assets/images/products/product-024.svg",
@@ -293,7 +293,7 @@
   },
   {
     "id": "25",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 20",
     "image": "assets/images/products/product-025.svg",
@@ -305,7 +305,7 @@
   },
   {
     "id": "26",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 21",
     "image": "assets/images/products/product-026.svg",
@@ -317,7 +317,7 @@
   },
   {
     "id": "27",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 22",
     "image": "assets/images/products/product-027.svg",
@@ -329,7 +329,7 @@
   },
   {
     "id": "28",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 23",
     "image": "assets/images/products/product-028.svg",
@@ -341,7 +341,7 @@
   },
   {
     "id": "29",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 24",
     "image": "assets/images/products/product-029.svg",
@@ -353,7 +353,7 @@
   },
   {
     "id": "30",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Wooden Planters",
     "name": "Wooden Planters 25",
     "image": "assets/images/products/product-030.svg",
@@ -365,7 +365,7 @@
   },
   {
     "id": "31",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 01",
     "image": "assets/images/products/product-031.svg",
@@ -379,7 +379,7 @@
   },
   {
     "id": "32",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 02",
     "image": "assets/images/products/product-032.svg",
@@ -391,7 +391,7 @@
   },
   {
     "id": "33",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 03",
     "image": "assets/images/products/product-033.svg",
@@ -403,7 +403,7 @@
   },
   {
     "id": "34",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 04",
     "image": "assets/images/products/product-034.svg",
@@ -415,7 +415,7 @@
   },
   {
     "id": "35",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 05",
     "image": "assets/images/products/product-035.svg",
@@ -427,7 +427,7 @@
   },
   {
     "id": "36",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 06",
     "image": "assets/images/products/product-036.svg",
@@ -439,7 +439,7 @@
   },
   {
     "id": "37",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 07",
     "image": "assets/images/products/product-037.svg",
@@ -451,7 +451,7 @@
   },
   {
     "id": "38",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 08",
     "image": "assets/images/products/product-038.svg",
@@ -463,7 +463,7 @@
   },
   {
     "id": "39",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 09",
     "image": "assets/images/products/product-039.svg",
@@ -475,7 +475,7 @@
   },
   {
     "id": "40",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 10",
     "image": "assets/images/products/product-040.svg",
@@ -487,7 +487,7 @@
   },
   {
     "id": "41",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 11",
     "image": "assets/images/products/product-041.svg",
@@ -499,7 +499,7 @@
   },
   {
     "id": "42",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 12",
     "image": "assets/images/products/product-042.svg",
@@ -511,7 +511,7 @@
   },
   {
     "id": "43",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 13",
     "image": "assets/images/products/product-043.svg",
@@ -523,7 +523,7 @@
   },
   {
     "id": "44",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 14",
     "image": "assets/images/products/product-044.svg",
@@ -535,7 +535,7 @@
   },
   {
     "id": "45",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Metallic Planters",
     "name": "Metallic Planters 15",
     "image": "assets/images/products/product-045.svg",
@@ -547,8 +547,8 @@
   },
   {
     "id": "46",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 16",
     "image": "assets/images/products/product-046.svg",
     "price": 0,
@@ -559,8 +559,8 @@
   },
   {
     "id": "47",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 17",
     "image": "assets/images/products/product-047.svg",
     "price": 0,
@@ -571,8 +571,8 @@
   },
   {
     "id": "48",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 18",
     "image": "assets/images/products/product-048.svg",
     "price": 0,
@@ -583,8 +583,8 @@
   },
   {
     "id": "49",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 19",
     "image": "assets/images/products/product-049.svg",
     "price": 0,
@@ -595,8 +595,8 @@
   },
   {
     "id": "50",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 20",
     "image": "assets/images/products/product-050.svg",
     "price": 0,
@@ -607,8 +607,8 @@
   },
   {
     "id": "51",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 21",
     "image": "assets/images/products/product-051.svg",
     "price": 0,
@@ -619,8 +619,8 @@
   },
   {
     "id": "52",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 22",
     "image": "assets/images/products/product-052.svg",
     "price": 0,
@@ -631,8 +631,8 @@
   },
   {
     "id": "53",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 23",
     "image": "assets/images/products/product-053.svg",
     "price": 0,
@@ -643,8 +643,8 @@
   },
   {
     "id": "54",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 24",
     "image": "assets/images/products/product-054.svg",
     "price": 0,
@@ -655,8 +655,8 @@
   },
   {
     "id": "55",
-    "category": "Home Decor",
-    "subcategory": "Metallic Planters",
+    "category": "Stands",
+    "subcategory": "Metal Stands",
     "name": "Metallic Planters 25",
     "image": "assets/images/products/product-055.svg",
     "price": 0,
@@ -667,7 +667,7 @@
   },
   {
     "id": "56",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 01",
     "image": "assets/images/products/product-056.svg",
@@ -679,7 +679,7 @@
   },
   {
     "id": "57",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 02",
     "image": "assets/images/products/product-057.svg",
@@ -691,7 +691,7 @@
   },
   {
     "id": "58",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 03",
     "image": "assets/images/products/product-058.svg",
@@ -703,7 +703,7 @@
   },
   {
     "id": "59",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 04",
     "image": "assets/images/products/product-059.svg",
@@ -715,7 +715,7 @@
   },
   {
     "id": "60",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 05",
     "image": "assets/images/products/product-060.svg",
@@ -727,7 +727,7 @@
   },
   {
     "id": "61",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 06",
     "image": "assets/images/products/product-061.svg",
@@ -739,7 +739,7 @@
   },
   {
     "id": "62",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 07",
     "image": "assets/images/products/product-062.svg",
@@ -751,7 +751,7 @@
   },
   {
     "id": "63",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 08",
     "image": "assets/images/products/product-063.svg",
@@ -763,7 +763,7 @@
   },
   {
     "id": "64",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 09",
     "image": "assets/images/products/product-064.svg",
@@ -775,7 +775,7 @@
   },
   {
     "id": "65",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 10",
     "image": "assets/images/products/product-065.svg",
@@ -787,7 +787,7 @@
   },
   {
     "id": "66",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 11",
     "image": "assets/images/products/product-066.svg",
@@ -799,7 +799,7 @@
   },
   {
     "id": "67",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 12",
     "image": "assets/images/products/product-067.svg",
@@ -811,7 +811,7 @@
   },
   {
     "id": "68",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 13",
     "image": "assets/images/products/product-068.svg",
@@ -823,7 +823,7 @@
   },
   {
     "id": "69",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 14",
     "image": "assets/images/products/product-069.svg",
@@ -835,7 +835,7 @@
   },
   {
     "id": "70",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 15",
     "image": "assets/images/products/product-070.svg",
@@ -847,7 +847,7 @@
   },
   {
     "id": "71",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 16",
     "image": "assets/images/products/product-071.svg",
@@ -859,7 +859,7 @@
   },
   {
     "id": "72",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 17",
     "image": "assets/images/products/product-072.svg",
@@ -871,7 +871,7 @@
   },
   {
     "id": "73",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 18",
     "image": "assets/images/products/product-073.svg",
@@ -883,7 +883,7 @@
   },
   {
     "id": "74",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 19",
     "image": "assets/images/products/product-074.svg",
@@ -895,7 +895,7 @@
   },
   {
     "id": "75",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Premium Plastic Planters",
     "name": "Premium Plastic Planters 20",
     "image": "assets/images/products/product-075.svg",
@@ -907,8 +907,8 @@
   },
   {
     "id": "76",
-    "category": "Home Decor",
-    "subcategory": "Premium Plastic Planters",
+    "category": "Stands",
+    "subcategory": "Wooden Stands",
     "name": "Premium Plastic Planters 21",
     "image": "assets/images/products/product-076.svg",
     "price": 0,
@@ -919,8 +919,8 @@
   },
   {
     "id": "77",
-    "category": "Home Decor",
-    "subcategory": "Premium Plastic Planters",
+    "category": "Stands",
+    "subcategory": "Wooden Stands",
     "name": "Premium Plastic Planters 22",
     "image": "assets/images/products/product-077.svg",
     "price": 0,
@@ -931,8 +931,8 @@
   },
   {
     "id": "78",
-    "category": "Home Decor",
-    "subcategory": "Premium Plastic Planters",
+    "category": "Stands",
+    "subcategory": "Wooden Stands",
     "name": "Premium Plastic Planters 23",
     "image": "assets/images/products/product-078.svg",
     "price": 0,
@@ -943,8 +943,8 @@
   },
   {
     "id": "79",
-    "category": "Home Decor",
-    "subcategory": "Premium Plastic Planters",
+    "category": "Stands",
+    "subcategory": "Wooden Stands",
     "name": "Premium Plastic Planters 24",
     "image": "assets/images/products/product-079.svg",
     "price": 0,
@@ -955,8 +955,8 @@
   },
   {
     "id": "80",
-    "category": "Home Decor",
-    "subcategory": "Premium Plastic Planters",
+    "category": "Stands",
+    "subcategory": "Wooden Stands",
     "name": "Premium Plastic Planters 25",
     "image": "assets/images/products/product-080.svg",
     "price": 0,
@@ -967,7 +967,7 @@
   },
   {
     "id": "81",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 01",
     "image": "assets/images/products/product-081.svg",
@@ -979,7 +979,7 @@
   },
   {
     "id": "82",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 02",
     "image": "assets/images/products/product-082.svg",
@@ -991,7 +991,7 @@
   },
   {
     "id": "83",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 03",
     "image": "assets/images/products/product-083.svg",
@@ -1003,7 +1003,7 @@
   },
   {
     "id": "84",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 04",
     "image": "assets/images/products/product-084.svg",
@@ -1015,7 +1015,7 @@
   },
   {
     "id": "85",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 05",
     "image": "assets/images/products/product-085.svg",
@@ -1027,7 +1027,7 @@
   },
   {
     "id": "86",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 06",
     "image": "assets/images/products/product-086.svg",
@@ -1039,7 +1039,7 @@
   },
   {
     "id": "87",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 07",
     "image": "assets/images/products/product-087.svg",
@@ -1051,7 +1051,7 @@
   },
   {
     "id": "88",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 08",
     "image": "assets/images/products/product-088.svg",
@@ -1063,7 +1063,7 @@
   },
   {
     "id": "89",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 09",
     "image": "assets/images/products/product-089.svg",
@@ -1075,7 +1075,7 @@
   },
   {
     "id": "90",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 10",
     "image": "assets/images/products/product-090.svg",
@@ -1087,7 +1087,7 @@
   },
   {
     "id": "91",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 11",
     "image": "assets/images/products/product-091.svg",
@@ -1099,7 +1099,7 @@
   },
   {
     "id": "92",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 12",
     "image": "assets/images/products/product-092.svg",
@@ -1111,7 +1111,7 @@
   },
   {
     "id": "93",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 13",
     "image": "assets/images/products/product-093.svg",
@@ -1123,7 +1123,7 @@
   },
   {
     "id": "94",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 14",
     "image": "assets/images/products/product-094.svg",
@@ -1135,7 +1135,7 @@
   },
   {
     "id": "95",
-    "category": "Home Decor",
+    "category": "Pots & Planters",
     "subcategory": "Office Gifts",
     "name": "Office Gifts 15",
     "image": "assets/images/products/product-095.svg",
@@ -1147,8 +1147,8 @@
   },
   {
     "id": "96",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Indoor Plants",
     "name": "Office Gifts 16",
     "image": "assets/images/products/product-096.svg",
     "price": 0,
@@ -1159,8 +1159,8 @@
   },
   {
     "id": "97",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Indoor Plants",
     "name": "Office Gifts 17",
     "image": "assets/images/products/product-097.svg",
     "price": 0,
@@ -1171,8 +1171,8 @@
   },
   {
     "id": "98",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Indoor Plants",
     "name": "Office Gifts 18",
     "image": "assets/images/products/product-098.svg",
     "price": 0,
@@ -1183,8 +1183,8 @@
   },
   {
     "id": "99",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Indoor Plants",
     "name": "Office Gifts 19",
     "image": "assets/images/products/product-099.svg",
     "price": 0,
@@ -1195,8 +1195,8 @@
   },
   {
     "id": "100",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Indoor Plants",
     "name": "Office Gifts 20",
     "image": "assets/images/products/product-100.svg",
     "price": 0,
@@ -1207,8 +1207,8 @@
   },
   {
     "id": "101",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Outdoor Plants",
     "name": "Office Gifts 21",
     "image": "assets/images/products/product-101.svg",
     "price": 0,
@@ -1219,8 +1219,8 @@
   },
   {
     "id": "102",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Outdoor Plants",
     "name": "Office Gifts 22",
     "image": "assets/images/products/product-102.svg",
     "price": 0,
@@ -1231,8 +1231,8 @@
   },
   {
     "id": "103",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Outdoor Plants",
     "name": "Office Gifts 23",
     "image": "assets/images/products/product-103.svg",
     "price": 0,
@@ -1243,8 +1243,8 @@
   },
   {
     "id": "104",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Outdoor Plants",
     "name": "Office Gifts 24",
     "image": "assets/images/products/product-104.svg",
     "price": 0,
@@ -1255,8 +1255,8 @@
   },
   {
     "id": "105",
-    "category": "Home Decor",
-    "subcategory": "Office Gifts",
+    "category": "Plants",
+    "subcategory": "Outdoor Plants",
     "name": "Office Gifts 25",
     "image": "assets/images/products/product-105.svg",
     "price": 0,
@@ -1267,7 +1267,7 @@
   },
   {
     "id": "106",
-    "category": "Pest & Disease Control",
+    "category": "Plant Care",
     "subcategory": "Pest & Disease Control",
     "name": "Pest & Disease Control Product 01",
     "image": "assets/images/products/product-106.svg",
@@ -1279,7 +1279,7 @@
   },
   {
     "id": "107",
-    "category": "Pest & Disease Control",
+    "category": "Plant Care",
     "subcategory": "Pest & Disease Control",
     "name": "Pest & Disease Control Product 02",
     "image": "assets/images/products/product-107.svg",
@@ -1291,7 +1291,7 @@
   },
   {
     "id": "108",
-    "category": "Pest & Disease Control",
+    "category": "Plant Care",
     "subcategory": "Pest & Disease Control",
     "name": "Pest & Disease Control Product 03",
     "image": "assets/images/products/product-108.svg",
@@ -1303,7 +1303,7 @@
   },
   {
     "id": "109",
-    "category": "Pest & Disease Control",
+    "category": "Plant Care",
     "subcategory": "Pest & Disease Control",
     "name": "Pest & Disease Control Product 04",
     "image": "assets/images/products/product-109.svg",
@@ -1315,7 +1315,7 @@
   },
   {
     "id": "110",
-    "category": "Pest & Disease Control",
+    "category": "Plant Care",
     "subcategory": "Pest & Disease Control",
     "name": "Pest & Disease Control Product 05",
     "image": "assets/images/products/product-110.svg",
@@ -1327,7 +1327,7 @@
   },
   {
     "id": "111",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 01",
     "image": "assets/images/products/product-111.svg",
@@ -1339,7 +1339,7 @@
   },
   {
     "id": "112",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 02",
     "image": "assets/images/products/product-112.svg",
@@ -1351,7 +1351,7 @@
   },
   {
     "id": "113",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 03",
     "image": "assets/images/products/product-113.svg",
@@ -1363,7 +1363,7 @@
   },
   {
     "id": "114",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 04",
     "image": "assets/images/products/product-114.svg",
@@ -1375,7 +1375,7 @@
   },
   {
     "id": "115",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 05",
     "image": "assets/images/products/product-115.svg",
@@ -1387,7 +1387,7 @@
   },
   {
     "id": "116",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 06",
     "image": "assets/images/products/product-116.svg",
@@ -1399,7 +1399,7 @@
   },
   {
     "id": "117",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 07",
     "image": "assets/images/products/product-117.svg",
@@ -1411,7 +1411,7 @@
   },
   {
     "id": "118",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 08",
     "image": "assets/images/products/product-118.svg",
@@ -1423,7 +1423,7 @@
   },
   {
     "id": "119",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 09",
     "image": "assets/images/products/product-119.svg",
@@ -1435,7 +1435,7 @@
   },
   {
     "id": "120",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 10",
     "image": "assets/images/products/product-120.svg",
@@ -1447,7 +1447,7 @@
   },
   {
     "id": "121",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 11",
     "image": "assets/images/products/product-121.svg",
@@ -1459,7 +1459,7 @@
   },
   {
     "id": "122",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 12",
     "image": "assets/images/products/product-122.svg",
@@ -1473,7 +1473,7 @@
   },
   {
     "id": "123",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 13",
     "image": "assets/images/products/product-123.svg",
@@ -1485,7 +1485,7 @@
   },
   {
     "id": "124",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 14",
     "image": "assets/images/products/product-124.svg",
@@ -1497,7 +1497,7 @@
   },
   {
     "id": "125",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 15",
     "image": "assets/images/products/product-125.svg",
@@ -1509,7 +1509,7 @@
   },
   {
     "id": "126",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 16",
     "image": "assets/images/products/product-126.svg",
@@ -1521,7 +1521,7 @@
   },
   {
     "id": "127",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 17",
     "image": "assets/images/products/product-127.svg",
@@ -1533,7 +1533,7 @@
   },
   {
     "id": "128",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 18",
     "image": "assets/images/products/product-128.svg",
@@ -1545,7 +1545,7 @@
   },
   {
     "id": "129",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 19",
     "image": "assets/images/products/product-129.svg",
@@ -1557,7 +1557,7 @@
   },
   {
     "id": "130",
-    "category": "Garden Tools",
+    "category": "Tools & Accessories",
     "subcategory": "Garden Tools",
     "name": "Garden Tool 20",
     "image": "assets/images/products/product-130.svg",
@@ -1569,8 +1569,8 @@
   },
   {
     "id": "131",
-    "category": "Garden Tools",
-    "subcategory": "Garden Tools",
+    "category": "Seeds",
+    "subcategory": "Vegetable Seeds",
     "name": "Garden Tool 21",
     "image": "assets/images/products/product-131.svg",
     "price": 0,
@@ -1581,8 +1581,8 @@
   },
   {
     "id": "132",
-    "category": "Garden Tools",
-    "subcategory": "Garden Tools",
+    "category": "Seeds",
+    "subcategory": "Vegetable Seeds",
     "name": "Garden Tool 22",
     "image": "assets/images/products/product-132.svg",
     "price": 0,
@@ -1593,8 +1593,8 @@
   },
   {
     "id": "133",
-    "category": "Garden Tools",
-    "subcategory": "Garden Tools",
+    "category": "Seeds",
+    "subcategory": "Vegetable Seeds",
     "name": "Garden Tool 23",
     "image": "assets/images/products/product-133.svg",
     "price": 0,
@@ -1605,8 +1605,8 @@
   },
   {
     "id": "134",
-    "category": "Garden Tools",
-    "subcategory": "Garden Tools",
+    "category": "Seeds",
+    "subcategory": "Vegetable Seeds",
     "name": "Garden Tool 24",
     "image": "assets/images/products/product-134.svg",
     "price": 0,
@@ -1617,8 +1617,8 @@
   },
   {
     "id": "135",
-    "category": "Garden Tools",
-    "subcategory": "Garden Tools",
+    "category": "Seeds",
+    "subcategory": "Vegetable Seeds",
     "name": "Garden Tool 25",
     "image": "assets/images/products/product-135.svg",
     "price": 0,
@@ -1749,8 +1749,8 @@
   },
   {
     "id": "146",
-    "category": "Combo Deals",
-    "subcategory": "Combo Deals",
+    "category": "Seeds",
+    "subcategory": "Flower Seeds",
     "name": "Garden Combo Deal 11",
     "image": "assets/images/products/product-146.svg",
     "price": 0,
@@ -1761,8 +1761,8 @@
   },
   {
     "id": "147",
-    "category": "Combo Deals",
-    "subcategory": "Combo Deals",
+    "category": "Seeds",
+    "subcategory": "Flower Seeds",
     "name": "Garden Combo Deal 12",
     "image": "assets/images/products/product-147.svg",
     "price": 0,
@@ -1773,8 +1773,8 @@
   },
   {
     "id": "148",
-    "category": "Combo Deals",
-    "subcategory": "Combo Deals",
+    "category": "Seeds",
+    "subcategory": "Flower Seeds",
     "name": "Garden Combo Deal 13",
     "image": "assets/images/products/product-148.svg",
     "price": 0,
@@ -1785,8 +1785,8 @@
   },
   {
     "id": "149",
-    "category": "Combo Deals",
-    "subcategory": "Combo Deals",
+    "category": "Seeds",
+    "subcategory": "Flower Seeds",
     "name": "Garden Combo Deal 14",
     "image": "assets/images/products/product-149.svg",
     "price": 0,
@@ -1797,8 +1797,8 @@
   },
   {
     "id": "150",
-    "category": "Combo Deals",
-    "subcategory": "Combo Deals",
+    "category": "Seeds",
+    "subcategory": "Flower Seeds",
     "name": "Garden Combo Deal 15",
     "image": "assets/images/products/product-150.svg",
     "price": 0,

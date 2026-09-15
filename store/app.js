@@ -1,13 +1,14 @@
 const CATEGORIES = [
   {
-    id: "fertilizers",
-    name: "Fertilizers",
-    icon: "🌱",
-    desc: "Feed plants naturally",
+    id: "plants",
+    name: "Plants",
+    icon: "🌿",
+    desc: "Live plants for home & garden",
+    subs: ["Indoor Plants", "Outdoor Plants"],
   },
   {
-    id: "home-decor",
-    name: "Home Decor",
+    id: "pots-planters",
+    name: "Pots & Planters",
     icon: "🪴",
     desc: "Planters & office gifts",
     subs: [
@@ -18,29 +19,39 @@ const CATEGORIES = [
     ],
   },
   {
-    id: "pest-control",
-    name: "Pest & Disease Control",
-    icon: "🛡️",
-    desc: "Protect every leaf",
+    id: "tools-accessories",
+    name: "Tools & Accessories",
+    icon: "🧰",
+    desc: "Tools for everyday care",
   },
   {
-    id: "tools",
-    name: "Garden Tools",
-    icon: "🧤",
-    desc: "Tools for everyday care",
+    id: "stands",
+    name: "Stands",
+    icon: "🗄️",
+    desc: "Plant stands for every space",
+    subs: ["Metal Stands", "Wooden Stands"],
+  },
+  {
+    id: "plant-care",
+    name: "Plant Care",
+    icon: "🌱",
+    desc: "Fertilizers & pest control",
+    subs: ["Organic Fertilizer", "Pest & Disease Control"],
+  },
+  {
+    id: "seeds",
+    name: "Seeds",
+    icon: "🌾",
+    desc: "Seeds & seed combos",
+    subs: ["Vegetable Seeds", "Flower Seeds"],
   },
   {
     id: "combos",
     name: "Combo Deals",
     icon: "🎁",
     desc: "More value, together",
+    navHidden: true,
   },
-];
-const HOME_DECOR_SUBS = [
-  "Wooden Planters",
-  "Metallic Planters",
-  "Premium Plastic Planters",
-  "Office Gifts",
 ];
 const STATE_CITIES = {
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Tirupati", "Nellore"],
@@ -85,9 +96,6 @@ const STATES = Object.keys(STATE_CITIES).sort();
 function normalized(value) {
   return String(value || "").trim().toLowerCase();
 }
-function normalizedSubcategory(value) {
-  return normalized(value).replace("premium premium plastic planters", "premium plastic planters");
-}
 function stateOptions(selected) {
   return `<option value="">Select state</option>${STATES.map((name) => `<option value="${name}" ${normalized(name) === normalized(selected) ? "selected" : ""}>${name}</option>`).join("")}`;
 }
@@ -98,6 +106,8 @@ const state = {
   accountToken: sessionStorage.getItem("tsw-account-token") || "",
   hero: 0,
   subcat: "all",
+  priceRange: "all",
+  inStockOnly: false,
 };
 
 const money = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
@@ -132,21 +142,23 @@ function getOrderTotals(customerState = state.account?.state) {
         item.qty,
     0,
   );
+  const isFertilizer = (product) => product.subcat === "Organic Fertilizer";
+  const isWoodenPlanter = (product) => product.subcat === "Wooden Planters";
   const fertilizerTax = state.cart.reduce((sum, item) => {
     const product = productById(item.id);
-    return product.category === "Fertilizers"
+    return isFertilizer(product)
       ? sum + product.price * item.qty * FERTILIZER_GST_RATE
       : sum;
   }, 0);
   const woodenPlanterTax = state.cart.reduce((sum, item) => {
     const product = productById(item.id);
-    return product.subcategory === "Wooden Planters"
+    return isWoodenPlanter(product)
       ? sum + product.price * item.qty * WOODEN_PLANTER_GST_RATE
       : sum;
   }, 0);
   const otherTax = state.cart.reduce((sum, item) => {
     const product = productById(item.id);
-    return product.category === "Fertilizers" || product.subcategory === "Wooden Planters"
+    return isFertilizer(product) || isWoodenPlanter(product)
       ? sum
       : sum + product.price * item.qty * OTHER_PRODUCT_GST_RATE;
   }, 0);
@@ -327,22 +339,53 @@ function home() {
   ).slice(0, 8);
   const categorySections = CATEGORIES.map((c) => {
     const items = PRODUCTS.filter((p) => p.category === c.name).slice(0, 4);
-    return `<section class="section category-products"><div class="container"><div class="section-head"><div><h2>${c.icon} ${c.name}</h2><p>${c.desc}</p></div><button class="link-btn" data-route="category:${c.id}">View all →</button></div><div class="product-grid">${items.map(productCard).join("")}</div></div></section>`;
+    return `<section class="section category-products"><div class="container"><div class="section-head"><div><h2>${c.icon} ${c.name}</h2><p>${c.desc}</p></div><button class="link-btn" data-route="category:${c.id}">View all →</button></div><div class="product-grid carousel">${items.map(productCard).join("")}</div></div></section>`;
   }).join("");
   return `<section class="hero" id="hero"><div class="hero-track" id="heroTrack"></div><div class="hero-controls"><button id="prevHero" aria-label="Previous slide">‹</button><button id="nextHero" aria-label="Next slide">›</button></div><div class="dots" id="heroDots" aria-label="Hero slides"></div></section>
+${promoBanner()}
 <section class="section"><div class="container"><div class="section-head"><div><h2>Shop by Category</h2><p>Browse every part of The Smiling Worm directly from the home page.</p></div><button class="link-btn" data-route="home">Shop all →</button></div><div class="category-grid">${CATEGORIES.map((c) => `<button class="cat-card" data-route="category:${c.id}"><span class="category-icon">${c.icon}</span><div><h3>${c.name}</h3><p>${c.desc}</p><span class="btn small secondary">Shop now</span></div></button>`).join("")}</div></div></section>
-<section class="section soft"><div class="container"><div class="section-head"><div><h2>Best Sellers</h2><p>Customer favourites are featured right here on the front page.</p></div><button class="link-btn" data-route="bestsellers">View all →</button></div><div class="product-grid">${best.map(productCard).join("")}</div></div></section>
-<section class="section"><div class="container"><div class="section-head"><div><h2>New Arrivals</h2><p>Fresh picks are visible on the front page for quick discovery.</p></div><button class="link-btn" data-route="new-arrivals">See everything →</button></div><div class="product-grid">${featured.map(productCard).join("")}</div></div></section>
+<section class="section soft"><div class="container"><div class="section-head"><div><h2>Best Sellers</h2><p>Customer favourites are featured right here on the front page.</p></div><button class="link-btn" data-route="bestsellers">View all →</button></div><div class="product-grid carousel">${best.map(productCard).join("")}</div></div></section>
+<section class="section"><div class="container"><div class="section-head"><div><h2>New Arrivals</h2><p>Fresh picks are visible on the front page for quick discovery.</p></div><button class="link-btn" data-route="new-arrivals">See everything →</button></div><div class="product-grid carousel">${featured.map(productCard).join("")}</div></div></section>
 ${categorySections}
 <section class="section soft"><div class="container"><div class="promo-grid"><article class="promo-card primary"><div><h3>Thoughtful plant care</h3><p>Natural-feeling solutions selected for homes, balconies, offices and gardens.</p><button class="btn small" data-route="plant-care">Explore plant care</button></div><span class="promo-art">🌿</span></article><article class="promo-card secondary"><div><h3>Combo deals</h3><p>Curated kits that make everyday plant care easier.</p><button class="btn small" data-route="category:combos">Shop combos</button></div><span class="promo-art">🎁</span></article></div></div></section>
 <section class="section"><div class="container"><div class="service-strip"><div class="service-item"><span>🚚</span><div><strong>Easy ordering</strong><small>Simple shopping from discovery to checkout.</small></div></div><div class="service-item"><span>♡</span><div><strong>Wishlist ready</strong><small>Keep favourite products close by.</small></div></div><div class="service-item"><span>↻</span><div><strong>Saved cart</strong><small>Your cart stays between visits.</small></div></div><div class="service-item"><span>🌱</span><div><strong>Grow with confidence</strong><small>Clear descriptions and organised categories.</small></div></div></div></div></section>`;
+}
+const PROMO_SALE_END = new Date("2026-10-15T23:59:59+05:30").getTime();
+function promoBanner() {
+  if (Date.now() >= PROMO_SALE_END) return "";
+  return `<section class="promo-strip"><div class="container promo-strip-inner"><div class="promo-strip-copy"><span class="promo-strip-badge">Limited time</span><h2>Monsoon Garden Sale — save on plant care essentials</h2><p>Stock up on fertilizers, planters, tools and more before the offer ends.</p><button class="btn" data-route="category:plant-care">Shop the sale</button></div><div class="promo-countdown" id="promoCountdown" data-end="${PROMO_SALE_END}"><div><strong id="cdDays">00</strong><span>Days</span></div><div><strong id="cdHours">00</strong><span>Hrs</span></div><div><strong id="cdMinutes">00</strong><span>Min</span></div><div><strong id="cdSeconds">00</strong><span>Sec</span></div></div></div></section>`;
+}
+function startCountdown() {
+  const el = document.getElementById("promoCountdown");
+  clearInterval(window.countdownTimer);
+  if (!el) return;
+  const end = Number(el.dataset.end);
+  const pad = (n) => String(Math.max(0, n)).padStart(2, "0");
+  const tick = () => {
+    const remaining = end - Date.now();
+    if (remaining <= 0) {
+      clearInterval(window.countdownTimer);
+      render();
+      return;
+    }
+    const days = Math.floor(remaining / 86400000);
+    const hours = Math.floor((remaining % 86400000) / 3600000);
+    const minutes = Math.floor((remaining % 3600000) / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    document.getElementById("cdDays").textContent = pad(days);
+    document.getElementById("cdHours").textContent = pad(hours);
+    document.getElementById("cdMinutes").textContent = pad(minutes);
+    document.getElementById("cdSeconds").textContent = pad(seconds);
+  };
+  tick();
+  window.countdownTimer = setInterval(tick, 1000);
 }
 const HEROES = [
   {
     title: "We take care of your garden & trees",
     text: "Natural solutions for healthier plants, greener gardens and happier homes.",
-    cta: "Shop fertilizers",
-    route: "category:fertilizers",
+    cta: "Shop plant care",
+    route: "category:plant-care",
     position: "center",
   },
   {
@@ -368,7 +411,7 @@ function setupHero() {
   if (!track || !dots) return;
   track.innerHTML = HEROES.map(
     (h, i) =>
-      `<article class="hero-slide ${i === state.hero ? "active" : ""}" data-index="${i}"><img src="assets/hero-reference.png" alt="Organic farming field" style="object-position:${h.position}"><div class="hero-overlay"></div><div class="hero-content container"><span class="eyebrow">THE SMILING WORM · MHOW ORGANICS</span><h1>${h.title}</h1><p>${h.text}</p><div class="hero-actions"><button class="btn" data-route="${h.route}">${h.cta}</button><button class="btn secondary" data-route="category:home-decor">Explore Home Decor</button></div></div></article>`,
+      `<article class="hero-slide ${i === state.hero ? "active" : ""}" data-index="${i}"><img src="assets/hero-reference.png" alt="Organic farming field" style="object-position:${h.position}"><div class="hero-overlay"></div><div class="hero-content container"><span class="eyebrow">THE SMILING WORM · MHOW ORGANICS</span><h1>${h.title}</h1><p>${h.text}</p><div class="hero-actions"><button class="btn" data-route="${h.route}">${h.cta}</button><button class="btn secondary" data-route="category:pots-planters">Explore Pots & Planters</button></div></div></article>`,
   ).join("");
   dots.innerHTML = HEROES.map(
     (_, i) =>
@@ -406,21 +449,37 @@ function setupHero() {
 function pageHeader(title, desc) {
   return `<section class="page-hero"><div class="container"><h1>${title}</h1><p>${desc}</p></div></section>`;
 }
+const PRICE_RANGES = [
+  { id: "all", label: "All prices" },
+  { id: "under-500", label: "Under ₹500", test: (p) => p.price < 500 },
+  {
+    id: "500-1000",
+    label: "₹500 – ₹1,000",
+    test: (p) => p.price >= 500 && p.price <= 1000,
+  },
+  {
+    id: "1000-2500",
+    label: "₹1,000 – ₹2,500",
+    test: (p) => p.price > 1000 && p.price <= 2500,
+  },
+  { id: "above-2500", label: "Above ₹2,500", test: (p) => p.price > 2500 },
+];
 function categoryPage(id, search = "") {
   const c = CATEGORIES.find((x) => x.id === id);
   if (!c) return notFound();
   let list = PRODUCTS.filter((p) => p.category === c.name);
   const sub = state.subcat;
-  if (c.id === "home-decor" && sub !== "all")
-    list = list.filter(
-      (p) => normalizedSubcategory(p.subcat) === normalizedSubcategory(sub),
-    );
+  if (c.subs && sub !== "all")
+    list = list.filter((p) => normalized(p.subcat) === normalized(sub));
   if (search)
     list = list.filter((p) =>
       `${p.name} ${p.description} ${p.category} ${p.subcat}`
         .toLowerCase()
         .includes(search.toLowerCase()),
     );
+  const activeRange = PRICE_RANGES.find((r) => r.id === state.priceRange);
+  if (activeRange?.test) list = list.filter(activeRange.test);
+  if (state.inStockOnly) list = list.filter((p) => p.stock > 0);
   const sort = document.getElementById("sortSelect")?.value || "recommended";
   list = [...list];
   if (sort === "price-asc") list.sort((a, b) => a.price - b.price);
@@ -429,7 +488,12 @@ function categoryPage(id, search = "") {
     list.sort((a, b) => Number(b.newArrival) - Number(a.newArrival));
   if (sort === "best")
     list.sort((a, b) => Number(b.bestseller) - Number(a.bestseller));
-  return `${pageHeader(c.name, c.id === "home-decor" ? "Explore 100 design-led pieces across 25 wooden planters, 25 metallic planters, 25 premium plastic planters and 25 office gifts." : `Explore ${list.length || ""} curated products in ${c.name.toLowerCase()}.`)}<section class="section"><div class="container"><div class="toolbar"><div class="filters">${c.id === "home-decor" ? HOME_DECOR_SUBS.map((x) => `<button class="subcat ${sub === x ? "active" : ""}" data-subcat="${x}">${x}</button>`).join("") : ""}</div><select class="select" id="sortSelect"><option value="recommended">Recommended</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="newest">Newest</option><option value="best">Best Selling</option></select></div><div class="product-grid">${list.map(productCard).join("")}</div></div></section>`;
+  const sidebar = `<aside class="filter-sidebar">${
+    c.subs
+      ? `<div class="filter-group"><h4>${c.name}</h4><div class="filters">${["all", ...c.subs].map((x) => `<button class="subcat ${sub === x ? "active" : ""}" data-subcat="${x}">${x === "all" ? "All" : x}</button>`).join("")}</div></div>`
+      : ""
+  }<div class="filter-group"><h4>Price</h4><div class="filters vertical">${PRICE_RANGES.map((r) => `<button class="subcat ${state.priceRange === r.id ? "active" : ""}" data-price="${r.id}">${r.label}</button>`).join("")}</div></div><div class="filter-group"><label class="stock-toggle"><input type="checkbox" id="inStockOnly" ${state.inStockOnly ? "checked" : ""}> In stock only</label></div></aside>`;
+  return `${pageHeader(c.name, `Explore ${list.length || ""} curated products in ${c.name.toLowerCase()}.`)}<section class="section"><div class="container category-layout">${sidebar}<div class="category-main"><div class="toolbar"><span>${list.length} products</span><select class="select" id="sortSelect"><option value="recommended">Recommended</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="newest">Newest</option><option value="best">Best Selling</option></select></div><div class="product-grid">${list.length ? list.map(productCard).join("") : `<div class="empty" style="grid-column:1/-1">No products matched these filters.</div>`}</div></div></div></section>`;
 }
 
 function listingPage(title, desc, filter) {
@@ -608,15 +672,6 @@ function render() {
       "Fresh products and new picks for your space.",
       (p) => p.newArrival,
     );
-  else if (route === "plant-care")
-    html = listingPage(
-      "Plant Care",
-      "Everyday essentials for feeding, protecting and tending your plants.",
-      (p) =>
-        ["Fertilizers", "Pest & Disease Control", "Garden Tools"].includes(
-          p.category,
-        ),
-    );
   else if (route.startsWith("category:"))
     html = categoryPage(route.split(":")[1]);
   else if (route.startsWith("search:"))
@@ -721,7 +776,13 @@ function render() {
   bindGlobal(document);
   bindProductEvents(app);
   setupHero();
+  startCountdown();
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function resetCategoryFilters() {
+  state.subcat = "all";
+  state.priceRange = "all";
+  state.inStockOnly = false;
 }
 function bindGlobal(root = document) {
   root.querySelectorAll("[data-route]").forEach((b) => {
@@ -731,22 +792,25 @@ function bindGlobal(root = document) {
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
-      if (target !== "category:home-decor") state.subcat = "all";
+      resetCategoryFilters();
       location.hash = target;
     };
   });
   const menu = document.getElementById("categoryMenu");
   if (menu) {
-    menu.innerHTML = CATEGORIES.map(
-      (c) =>
-        `<button data-route="category:${c.id}">${c.icon} ${c.name}</button>`,
-    ).join("");
+    menu.innerHTML = CATEGORIES.filter((c) => !c.navHidden)
+      .map(
+        (c) =>
+          `<div class="mega-col"><button class="mega-col-head" data-route="category:${c.id}">${c.icon} ${c.name}</button>${c.subs ? `<div class="mega-col-subs">${c.subs.map((s) => `<button data-route="category:${c.id}" data-subcat="${s}">${s}</button>`).join("")}</div>` : ""}</div>`,
+      )
+      .join("");
     menu.querySelectorAll("[data-route]").forEach(
       (b) =>
         (b.onclick = () => {
           location.hash = b.dataset.route;
           menu.hidden = true;
-          state.subcat = "all";
+          resetCategoryFilters();
+          if (b.dataset.subcat) state.subcat = b.dataset.subcat;
         }),
     );
   }
@@ -781,13 +845,26 @@ function bindGlobal(root = document) {
       { passive: true },
     );
   }
-  root.querySelectorAll("[data-subcat]").forEach(
+  root.querySelectorAll(".filter-sidebar [data-subcat]").forEach(
     (b) =>
       (b.onclick = () => {
         state.subcat = b.dataset.subcat;
         render();
       }),
   );
+  root.querySelectorAll("[data-price]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        state.priceRange = b.dataset.price;
+        render();
+      }),
+  );
+  const stockToggle = document.getElementById("inStockOnly");
+  if (stockToggle)
+    stockToggle.onchange = () => {
+      state.inStockOnly = stockToggle.checked;
+      render();
+    };
   const sort = document.getElementById("sortSelect");
   if (sort) sort.onchange = () => render();
   root

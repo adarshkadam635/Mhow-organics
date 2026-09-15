@@ -255,6 +255,11 @@ app.patch("/api/store/account", customerAuth, (req, res) => {
   res.json({ ...account.profile });
 });
 
+app.get("/api/store/accounts", auth, (_req, res) => {
+  const accounts = readJson(STORE_ACCOUNTS_FILE, []);
+  res.json(accounts.map((account) => ({ id: account.id, createdAt: account.createdAt, ...account.profile })));
+});
+
 app.get("/api/products", (_req, res) => res.json(readJson(PRODUCTS_FILE, [])));
 app.put("/api/products/:id", auth, (req, res) => {
   const products = readJson(PRODUCTS_FILE, []);

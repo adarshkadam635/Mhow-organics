@@ -3,17 +3,21 @@ const state = {
   products: [],
   enquiries: [],
   orders: [],
+  customers: [],
 };
 const $ = (s) => document.querySelector(s);
 let currentTab = "overview";
 let productFilter = "all";
+let customerSearch = "";
 const loginForm = $("#loginForm");
 const loginError = $("#loginError");
 const PRODUCT_CATEGORIES = [
-  "Fertilizers",
-  "Home Decor",
-  "Pest & Disease Control",
-  "Garden Tools",
+  "Plants",
+  "Pots & Planters",
+  "Tools & Accessories",
+  "Stands",
+  "Plant Care",
+  "Seeds",
   "Combo Deals",
 ];
 
@@ -135,15 +139,17 @@ async function login(username, password) {
   await load();
 }
 async function load() {
-  const [products, enquiries, orders] = await Promise.allSettled([
+  const [products, enquiries, orders, customers] = await Promise.allSettled([
     api("/products"),
     api("/enquiries"),
     api("/orders"),
+    api("/store/accounts"),
   ]);
   if (orders.status === "rejected") throw orders.reason;
   state.products = products.status === "fulfilled" ? products.value : [];
   state.enquiries = enquiries.status === "fulfilled" ? enquiries.value : [];
   state.orders = orders.value;
+  state.customers = customers.status === "fulfilled" ? customers.value : [];
   render(currentTab);
 }
 function render(tab) {
@@ -153,12 +159,15 @@ function render(tab) {
     .forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
   const content = $("#content");
   if (tab === "overview")
-    content.innerHTML = `<div class="stats"><div class="stat"><strong>${state.products.filter((p) => p.active).length}</strong><span>Active products</span></div><div class="stat"><strong>${state.products.filter((p) => !p.active).length}</strong><span>Hidden products</span></div><div class="stat"><strong>${state.enquiries.filter((e) => e.status === "new").length}</strong><span>New enquiries</span></div><div class="stat"><strong>${state.orders.filter((o) => o.status === "new").length}</strong><span>New orders</span></div></div><div class="panel"><h2>Recent activity</h2><p class="muted">${
+    content.innerHTML = `<div class="stats"><div class="stat"><strong>${state.products.filter((p) => p.active).length}</strong><span>Active products</span></div><div class="stat"><strong>${state.products.filter((p) => !p.active).length}</strong><span>Hidden products</span></div><div class="stat"><strong>${state.customers.length}</strong><span>Registered customers</span></div><div class="stat"><strong>${state.enquiries.filter((e) => e.status === "new").length}</strong><span>New enquiries</span></div><div class="stat"><strong>${state.orders.filter((o) => o.status === "new").length}</strong><span>New orders</span></div></div><div class="panel"><h2>Recent activity</h2><p class="muted">${
       state.enquiries
         .slice(0, 3)
         .map((e) => `${e.name} sent a ${e.type} enquiry`)
         .join("<br>") || "No enquiries yet."
     }</p></div>`;
+  if (tab === "customers")
+    ((content.innerHTML = `<div class="panel"><div class="toolbar"><h2>Customers (${state.customers.length})</h2><input id="customerSearch" placeholder="Search by name, email or phone" value="${customerSearch.replaceAll('"', "&quot;")}"></div><div id="customerRows"></div></div>`),
+      renderCustomers());
   if (tab === "products")
     ((content.innerHTML = `<div class="panel"><div class="toolbar"><h2>Products</h2><input id="productSearch" placeholder="Search products"></div><div class="product-filters" role="tablist" aria-label="Product sections"><button type="button" class="product-filter ${productFilter === "all" ? "active" : ""}" data-product-filter="all" role="tab" aria-selected="${productFilter === "all"}">All</button><button type="button" class="product-filter ${productFilter === "newArrival" ? "active" : ""}" data-product-filter="newArrival" role="tab" aria-selected="${productFilter === "newArrival"}">New arrivals</button><button type="button" class="product-filter ${productFilter === "bestseller" ? "active" : ""}" data-product-filter="bestseller" role="tab" aria-selected="${productFilter === "bestseller"}">Bestsellers</button></div><div id="productRows"></div></div>`),
       renderProducts());
@@ -181,7 +190,7 @@ function renderProducts() {
       (p) => {
         const imagePath = p.image?.startsWith("/") ? p.image : `../${p.image || ""}`;
         const placement = p.newArrival ? "newArrival" : p.bestseller ? "bestseller" : "";
-        return `<form class="panel edit-grid" data-product="${p.id}"><label>Name<input name="name" value="${p.name.replaceAll('"', "&quot;")}"></label><label>Category<select name="category">${categoryOptions(p.category)}</select></label><label>Store section<select name="placement"><option value="" ${!placement ? "selected" : ""}>Standard</option><option value="newArrival" ${placement === "newArrival" ? "selected" : ""}>New arrival</option><option value="bestseller" ${placement === "bestseller" ? "selected" : ""}>Bestseller</option></select></label><label>Price<input name="price" type="number" min="0" value="${p.price}"></label><label>Stock<input name="stock" type="number" min="0" value="${p.stock}"></label><label class="wide">Description<textarea name="description">${p.description}</textarea></label><div class="wide image-upload" tabindex="0"><div class="image-preview"><img src="${imagePath}" alt="Current ${p.name.replaceAll('"', "&quot;")} image"><div><strong>Product picture</strong><small class="muted">Paste an image here or use PNG, JPG, WEBP or GIF up to 8 MB</small></div></div><label class="upload-button" for="image-${p.id}">Add picture<input id="image-${p.id}" name="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></label></div><label>Active<select name="active"><option value="true" ${p.active ? "selected" : ""}>Visible</option><option value="false" ${!p.active ? "selected" : ""}>Hidden</option></select></label><div class="save-row"><span class="save-status" aria-live="polite"></span><button class="save small">Save product ${p.id}</button></div></form>`;
+        return `<form class="panel edit-grid" data-product="${p.id}"><label>Name<input name="name" value="${p.name.replaceAll('"', "&quot;")}"></label><label>Category<select name="category">${categoryOptions(p.category)}</select></label><label>Subcategory<input name="subcategory" value="${(p.subcategory || "").replaceAll('"', "&quot;")}" placeholder="e.g. Wooden Planters"></label><label>Store section<select name="placement"><option value="" ${!placement ? "selected" : ""}>Standard</option><option value="newArrival" ${placement === "newArrival" ? "selected" : ""}>New arrival</option><option value="bestseller" ${placement === "bestseller" ? "selected" : ""}>Bestseller</option></select></label><label>Price<input name="price" type="number" min="0" value="${p.price}"></label><label>Stock<input name="stock" type="number" min="0" value="${p.stock}"></label><label class="wide">Description<textarea name="description">${p.description}</textarea></label><div class="wide image-upload" tabindex="0"><div class="image-preview"><img src="${imagePath}" alt="Current ${p.name.replaceAll('"', "&quot;")} image"><div><strong>Product picture</strong><small class="muted">Paste an image here or use PNG, JPG, WEBP or GIF up to 8 MB</small></div></div><label class="upload-button" for="image-${p.id}">Add picture<input id="image-${p.id}" name="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></label></div><label>Active<select name="active"><option value="true" ${p.active ? "selected" : ""}>Visible</option><option value="false" ${!p.active ? "selected" : ""}>Hidden</option></select></label><div class="save-row"><span class="save-status" aria-live="polite"></span><button class="save small">Save product ${p.id}</button></div></form>`;
       },
     )
     .join("");
@@ -244,6 +253,28 @@ function renderProducts() {
       }),
   );
   $("#productSearch").oninput = renderProducts;
+}
+function renderCustomers() {
+  const input = $("#customerSearch");
+  if (input) customerSearch = input.value;
+  const q = customerSearch.toLowerCase();
+  const rows = state.customers
+    .filter((c) =>
+      [c.name, c.email, c.phone].some((field) =>
+        String(field || "").toLowerCase().includes(q),
+      ),
+    )
+    .map((c) => {
+      const address =
+        [c.house, c.street, c.city, c.state, c.pincode, c.country]
+          .filter(Boolean)
+          .map(invoiceText)
+          .join(", ") || "Not provided";
+      return `<tr><td>${invoiceText(c.name) || "—"}</td><td>${invoiceText(c.email) || "—"}</td><td>${invoiceText(c.phone) || "—"}</td><td>${invoiceText(c.company) || ""}</td><td>${address}</td><td>${c.createdAt ? new Date(c.createdAt).toLocaleString() : ""}</td></tr>`;
+    })
+    .join("");
+  $("#customerRows").innerHTML = `<table class="table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Company</th><th>Address</th><th>Joined</th></tr></thead><tbody>${rows || `<tr><td colspan="6" class="muted">No customers match.</td></tr>`}</tbody></table>`;
+  if (input) input.oninput = renderCustomers;
 }
 function bindStatusHandlers() {
   const clearButton = $("[data-clear-enquiries]");
@@ -360,7 +391,7 @@ async function startDashboard() {
 
 startDashboard();
 window.setInterval(() => {
-  if (document.visibilityState === "visible" && state.token && currentTab !== "products") {
+  if (document.visibilityState === "visible" && state.token && currentTab !== "products" && currentTab !== "customers") {
     load().catch(() => {});
   }
 }, 30000);

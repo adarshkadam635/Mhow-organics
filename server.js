@@ -18,6 +18,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "organics@911";
 const SHIPROCKET_EMAIL = process.env.SHIPROCKET_EMAIL || "";
 const SHIPROCKET_PASSWORD = process.env.SHIPROCKET_PASSWORD || "";
 const SHIPROCKET_PICKUP_LOCATION = process.env.SHIPROCKET_PICKUP_LOCATION || "Primary";
+const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
 const CUSTOMER_SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 const PASSWORD_RESET_MAX_AGE = 10 * 60 * 1000;
 const PASSWORD_RESET_MAX_ATTEMPTS = 5;
@@ -179,7 +181,8 @@ app.post("/api/store/auth/login", (req, res) => {
   const email = clean(req.body.email, 160).toLowerCase();
   const password = String(req.body.password || "");
   const account = readJson(STORE_ACCOUNTS_FILE, []).find((entry) => accountEmail(entry) === email);
-  if (!account || !passwordsMatch(password, account)) return res.status(401).json({ error: "Invalid email or password" });
+  // Accounts created through Supabase hold no local password hash.
+  if (!account || !account.passwordHash || !passwordsMatch(password, account)) return res.status(401).json({ error: "Invalid email or password" });
   res.json({ ok: true, token: customerToken(account), account: { ...account.profile } });
 });
 app.post("/api/store/auth/forgot-password", async (req, res) => {
@@ -253,6 +256,50 @@ app.patch("/api/store/account", customerAuth, (req, res) => {
   if (!account.profile.name || !account.profile.email || !account.profile.phone) return res.status(400).json({ error: "Name, email and phone are required" });
   writeJson(STORE_ACCOUNTS_FILE, accounts);
   res.json({ ...account.profile });
+});
+
+// Mirrors a Supabase-authenticated customer into the local customer
+// directory so the admin panel's Customers tab lists every signup.
+app.post("/api/store/profile-sync", async (req, res) => {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return res.status(503).json({ error: "Supabase is not configured on the server. Set SUPABASE_URL and SUPABASE_ANON_KEY." });
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  if (!token) return res.status(401).json({ error: "Sign in required" });
+  let user;
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` } });
+    user = await response.json();
+    if (!response.ok || !user?.id) return res.status(401).json({ error: "Your session is no longer valid" });
+  } catch (error) {
+    return res.status(502).json({ error: "Could not verify the session with Supabase" });
+  }
+  const email = clean(user.email, 160).toLowerCase();
+  if (!email) return res.status(400).json({ error: "The Supabase account has no email address" });
+  const metadata = user.user_metadata || {};
+  const field = (key, max) => clean(req.body[key] ?? metadata[key], max);
+  const profile = {
+    name: field("name", 120),
+    email,
+    phone: field("phone", 40),
+    company: field("company", 120),
+    house: field("house", 160),
+    street: field("street", 160),
+    city: field("city", 120),
+    state: field("state", 120),
+    pincode: field("pincode", 20),
+    country: field("country", 80),
+  };
+  const accounts = readJson(STORE_ACCOUNTS_FILE, []);
+  const existing = accounts.find((account) => account.supabaseId === user.id || accountEmail(account) === email);
+  if (existing) {
+    existing.supabaseId = user.id;
+    existing.provider = "supabase";
+    existing.profile = { ...existing.profile, ...profile };
+    existing.updatedAt = new Date().toISOString();
+  } else {
+    accounts.unshift({ id: crypto.randomUUID(), supabaseId: user.id, provider: "supabase", profile, createdAt: user.created_at || new Date().toISOString() });
+  }
+  writeJson(STORE_ACCOUNTS_FILE, accounts);
+  res.json({ ok: true });
 });
 
 app.get("/api/store/accounts", auth, (_req, res) => {

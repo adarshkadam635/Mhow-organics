@@ -108,6 +108,8 @@ const state = {
   subcat: "all",
   priceRange: "all",
   inStockOnly: false,
+  authView: "signin",
+  authSlide: 0,
 };
 
 const money = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
@@ -208,18 +210,6 @@ function save() {
   localStorage.setItem("tsw-account", JSON.stringify(state.account));
   updateCounts();
 }
-async function restoreAccountSession() {
-  if (!state.accountToken) return;
-  try {
-    state.account = await storeApi("/account");
-    save();
-  } catch (error) {
-    state.accountToken = "";
-    state.account = {};
-    sessionStorage.removeItem("tsw-account-token");
-    save();
-  }
-}
 async function storeApi(path, options = {}) {
   let response;
   try {
@@ -237,6 +227,186 @@ async function storeApi(path, options = {}) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `Account request failed (${response.status})`);
   return data;
+}
+
+/* ---------------------------------------------------------------
+   ACCOUNTS — Supabase authentication.
+   Settings live in store/supabase-config.js. Until they are filled
+   in, the store falls back to this site's own account API so the
+   sign-in page keeps working.
+   --------------------------------------------------------------- */
+const SUPABASE_SETTINGS = window.SUPABASE_CONFIG || {};
+function supabaseConfigured() {
+  const url = String(SUPABASE_SETTINGS.url || "");
+  const key = String(SUPABASE_SETTINGS.anonKey || "");
+  return (
+    url.startsWith("http") &&
+    !url.includes("YOUR_") &&
+    key.length > 20 &&
+    !key.includes("YOUR_") &&
+    Boolean(window.supabase?.createClient)
+  );
+}
+const supabaseClient = supabaseConfigured()
+  ? window.supabase.createClient(SUPABASE_SETTINGS.url, SUPABASE_SETTINGS.anonKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    })
+  : null;
+const PROFILE_FIELDS = ["name", "phone", "company", "house", "street", "city", "state", "pincode", "country"];
+function supabaseResult({ data, error }) {
+  if (error) throw new Error(error.message || "Account request failed");
+  return data;
+}
+function profileFromUser(user) {
+  const meta = user?.user_metadata || {};
+  const profile = { email: user?.email || "" };
+  for (const field of PROFILE_FIELDS) profile[field] = String(meta[field] ?? "");
+  return profile;
+}
+function profileFromForm(data) {
+  const profile = {};
+  for (const field of PROFILE_FIELDS) profile[field] = String(data[field] ?? "").trim();
+  return profile;
+}
+function resetRedirectUrl() {
+  return `${location.origin}${SUPABASE_SETTINGS.resetRedirectPath || "/store/reset-password.html"}`;
+}
+// Setup instructions belong to whoever is building the site, never to
+// a shopper, so they only appear when running locally.
+function isLocalDev() {
+  return ["localhost", "127.0.0.1", ""].includes(location.hostname);
+}
+// Mirrors the signed-in customer into the site's own records so the
+// admin panel's Customers tab still lists everyone who signs up.
+async function syncProfileToAdmin() {
+  if (!supabaseClient || !state.accountToken) return;
+  try {
+    await fetch("../api/store/profile-sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${state.accountToken}` },
+      body: JSON.stringify(state.account || {}),
+    });
+  } catch (error) {
+    // Staying signed in matters more than the admin mirror being current.
+  }
+}
+const auth = {
+  usesSupabase: Boolean(supabaseClient),
+  async restore() {
+    if (supabaseClient) {
+      const data = await supabaseClient.auth
+        .getSession()
+        .then(supabaseResult)
+        .catch(() => null);
+      const session = data?.session;
+      state.accountToken = session?.access_token || "";
+      state.account = session ? profileFromUser(session.user) : {};
+      save();
+      return;
+    }
+    if (!state.accountToken) return;
+    try {
+      state.account = await storeApi("/account");
+      save();
+    } catch (error) {
+      state.accountToken = "";
+      state.account = {};
+      sessionStorage.removeItem("tsw-account-token");
+      save();
+    }
+  },
+  async signIn(email, password) {
+    if (supabaseClient) {
+      const data = supabaseResult(
+        await supabaseClient.auth.signInWithPassword({ email, password }),
+      );
+      state.accountToken = data.session?.access_token || "";
+      state.account = profileFromUser(data.user);
+      save();
+      syncProfileToAdmin();
+      return;
+    }
+    const result = await storeApi("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+    state.accountToken = result.token;
+    sessionStorage.setItem("tsw-account-token", state.accountToken);
+    state.account = result.account;
+    save();
+  },
+  async signUp(form) {
+    const email = String(form.email || "").trim().toLowerCase();
+    const password = String(form.password || "");
+    const name = String(form.name || "").trim();
+    const phone = String(form.phone || "").trim();
+    if (supabaseClient) {
+      const data = supabaseResult(
+        await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { data: { name, phone }, emailRedirectTo: `${location.origin}/store/#account` },
+        }),
+      );
+      // With email confirmation switched on, Supabase returns no session
+      // until the customer clicks the link in their inbox.
+      if (!data.session) return { needsConfirmation: true };
+      state.accountToken = data.session.access_token;
+      state.account = profileFromUser(data.user);
+      save();
+      syncProfileToAdmin();
+      return { needsConfirmation: false };
+    }
+    const result = await storeApi("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name, email, phone, password }),
+    });
+    state.accountToken = result.token;
+    sessionStorage.setItem("tsw-account-token", state.accountToken);
+    state.account = result.account;
+    save();
+    return { needsConfirmation: false };
+  },
+  async saveProfile(form) {
+    if (supabaseClient) {
+      const data = supabaseResult(
+        await supabaseClient.auth.updateUser({ data: profileFromForm(form) }),
+      );
+      state.account = profileFromUser(data.user);
+      save();
+      await syncProfileToAdmin();
+      return;
+    }
+    state.account = await storeApi("/account", {
+      method: "PATCH",
+      body: JSON.stringify(form),
+    });
+    save();
+  },
+  async signOut() {
+    if (supabaseClient) await supabaseClient.auth.signOut().catch(() => {});
+    else await storeApi("/auth/logout", { method: "POST" }).catch(() => {});
+    state.accountToken = "";
+    state.account = {};
+    sessionStorage.removeItem("tsw-account-token");
+    save();
+  },
+  async sendResetLink(email) {
+    if (!supabaseClient)
+      throw new Error(
+        isLocalDev()
+          ? "Password reset emails need Supabase. Add your project URL and anon key to store/supabase-config.js."
+          : "Password reset is not available right now. Please email mhoworganics@gmail.com or call +91 7985451261 and we will help you back in.",
+      );
+    supabaseResult(
+      await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: resetRedirectUrl(),
+      }),
+    );
+  },
+};
+async function restoreAccountSession() {
+  await auth.restore();
 }
 function updateCounts() {
   document.getElementById("cartCount").textContent = state.cart.reduce(
@@ -577,21 +747,98 @@ function cartPage() {
   return `${pageHeader("Your Cart", "Review items, adjust quantities and continue to secure checkout.")}<section class="section"><div class="container cart-layout"><div class="cart-list">${rows}</div><aside class="summary-card"><h3>Order summary</h3><div class="sum-row"><span>Subtotal</span><strong>${money(totals.subtotal)}</strong></div><div class="sum-row"><span>Product savings</span><strong>−${money(totals.discount)}</strong></div>${taxRows(totals)}<div class="sum-row"><span>Shipping</span><strong>${totals.shipping ? money(totals.shipping) : "Free"}</strong></div><div class="sum-row total"><span>Total</span><strong>${money(totals.total)}</strong></div><button class="btn" style="width:100%;margin-top:14px" data-route="checkout">Proceed to Checkout</button><p style="font-size:12px;color:var(--muted);margin:12px 0 0">Free shipping on orders above ₹1,499. Tax is based on your delivery state.</p></aside></div></section>`;
 }
 
-function localAccountPage() {
-  const a = state.account || {};
-    return `${pageHeader("Your Account", "Save your details and speed up checkout.")}<section class="section"><div class="container panel"><form id="accountForm" class="form-grid"><div class="field"><label>Full name</label><input name="name" value="${a.name || ""}" required /></div><div class="field"><label>Email</label><input type="email" name="email" value="${a.email || ""}" required /></div><div class="field"><label>Phone number</label><input name="phone" value="${a.phone || ""}" required /></div><div class="field"><label>Company (optional)</label><input name="company" value="${a.company || ""}" /></div><div class="field full"><label>House / Flat</label><input name="house" value="${a.house || ""}" /></div><div class="field"><label>Street</label><input name="street" value="${a.street || ""}" /></div><div class="field"><label>City</label><input name="city" value="${a.city || ""}" /></div><div class="field"><label>State</label><select name="state" data-location-state>${stateOptions(a.state)}</select></div><div class="field"><label>Pincode</label><input name="pincode" value="${a.pincode || ""}" /></div><div class="field"><label>Country</label><input name="country" value="${a.country || "India"}" /></div><div class="field full"><button class="btn" type="submit">Save account details</button></div></form></div></section>`;
+const AUTH_SLIDES = [
+  {
+    title: "Grow something good",
+    text: "Save your details once and move from cart to doorstep in a few taps.",
+  },
+  {
+    title: "Keep your favourites close",
+    text: "Your wishlist and cart wait for you between visits, on any device.",
+  },
+  {
+    title: "Every order, in one place",
+    text: "Delivery details and invoices stay tied to your account.",
+  },
+];
+function authSignInForm() {
+  return `<h1>Welcome back</h1><p class="auth-sub">Sign in to your Smiling Worm account.</p>
+<form id="accountLoginForm" class="auth-form" novalidate>
+<label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
+<label class="auth-field"><span>Password</span><input name="password" type="password" autocomplete="current-password" placeholder="Your password" required /></label>
+<button class="link-btn auth-link-right" type="button" data-auth-view="forgot">Forgot password?</button>
+<button class="btn auth-submit" type="submit">Sign in</button>
+</form>
+<div class="auth-divider"><span>or</span></div>
+<p class="auth-switch">New to The Smiling Worm? <button class="link-btn" type="button" data-auth-view="signup">Create account</button></p>`;
 }
-function legacyAccountPage() {
-  const a = state.account || {};
-  if (!state.accountToken)
-    return `${pageHeader("Your Account", "Create a secure store account or sign in to save your details.")}<section class="section"><div class="container account-auth-grid"><div class="panel"><h2>Sign in</h2><p class="muted">Use your account ID and password.</p><form id="accountLoginForm" class="form-grid"><div class="field full"><label>Account ID</label><input name="username" autocomplete="username" required /></div><div class="field full"><label>Password</label><input name="password" type="password" autocomplete="current-password" required /></div><div class="field full"><button class="btn" type="submit">Sign in</button></div></form></div><div class="panel"><h2>Create account</h2><p class="muted">Your password is stored securely on the server.</p><form id="accountRegisterForm" class="form-grid"><div class="field full"><label>Account ID</label><input name="username" autocomplete="username" pattern="[A-Za-z0-9._-]{3,40}" required /></div><div class="field"><label>Password</label><input name="password" type="password" minlength="8" autocomplete="new-password" required /></div><div class="field"><label>Confirm password</label><input name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required /></div><div class="field"><label>Full name</label><input name="name" autocomplete="name" required /></div><div class="field"><label>Email</label><input name="email" type="email" autocomplete="email" required /></div><div class="field full"><label>Phone number</label><input name="phone" type="tel" autocomplete="tel" required /></div><div class="field full"><button class="btn" type="submit">Create account</button></div></form></div></div></section>`;
-  return `${pageHeader("Your Account", `Signed in as ${escapeHtml(a.username || "customer")}.`)}<section class="section"><div class="container panel"><div class="account-header"><div><h2>Account details</h2><p class="muted">Your saved details are used to speed up checkout.</p></div><button class="btn outline" type="button" id="accountLogout">Sign out</button></div><form id="accountForm" class="form-grid"><div class="field"><label>Full name</label><input name="name" value="${escapeHtml(a.name)}" required /></div><div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(a.email)}" required /></div><div class="field"><label>Phone number</label><input name="phone" value="${escapeHtml(a.phone)}" required /></div><div class="field"><label>Company (optional)</label><input name="company" value="${escapeHtml(a.company)}" /></div><div class="field full"><label>House / Flat</label><input name="house" value="${escapeHtml(a.house)}" /></div><div class="field"><label>Street</label><input name="street" value="${escapeHtml(a.street)}" /></div><div class="field"><label>City</label><input name="city" value="${escapeHtml(a.city)}" /></div><div class="field"><label>State</label><select name="state" data-location-state>${stateOptions(a.state)}</select></div><div class="field"><label>Pincode</label><input name="pincode" value="${escapeHtml(a.pincode)}" /></div><div class="field"><label>Country</label><input name="country" value="${escapeHtml(a.country || "India")}" /></div><div class="field full"><button class="btn" type="submit">Save account details</button></div></form></div></section>`;
+function authSignUpForm() {
+  return `<h1>Create your account</h1><p class="auth-sub">One account for your cart, wishlist and orders.</p>
+<form id="accountRegisterForm" class="auth-form" novalidate>
+<label class="auth-field"><span>Full name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
+<label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
+<label class="auth-field"><span>Phone number</span><input name="phone" type="tel" autocomplete="tel" placeholder="10-digit mobile number" required /></label>
+<label class="auth-field"><span>Password</span><input name="password" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters" required /></label>
+<label class="auth-field"><span>Confirm password</span><input name="confirmPassword" type="password" minlength="8" autocomplete="new-password" placeholder="Repeat your password" required /></label>
+<button class="btn auth-submit" type="submit">Create account</button>
+<p class="auth-status" data-auth-status role="status"></p>
+</form>
+<div class="auth-divider"><span>or</span></div>
+<p class="auth-switch">Already have an account? <button class="link-btn" type="button" data-auth-view="signin">Sign in</button></p>`;
+}
+function authForgotForm() {
+  return `<h1>Reset your password</h1><p class="auth-sub">Enter the email address on your account and we will send you a link to choose a new password.</p>
+<form id="forgotPasswordForm" class="auth-form" novalidate>
+<label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
+<button class="btn auth-submit" type="submit">Send reset link</button>
+<p class="auth-status" data-reset-status role="status"></p>
+</form>
+<p class="auth-switch"><button class="link-btn" type="button" data-auth-view="signin">← Back to sign in</button></p>`;
+}
+function authScreen() {
+  const view = state.authView || "signin";
+  const form = view === "signup" ? authSignUpForm() : view === "forgot" ? authForgotForm() : authSignInForm();
+  const notice =
+    auth.usesSupabase || !isLocalDev()
+      ? ""
+      : `<p class="auth-note">Developer note: Supabase is not connected yet. Add your project URL and anon key to <code>store/supabase-config.js</code> to switch on emailed password resets. Sign-in runs on this site's own server until then.</p>`;
+  return `<section class="auth-screen"><div class="container"><div class="auth-card">
+<aside class="auth-visual">
+<div class="auth-visual-art"><img src="assets/logo.png" alt="The Smiling Worm by Mhow Organics" /></div>
+<div class="auth-visual-slides" id="authSlides">${AUTH_SLIDES.map((slide, i) => `<article class="auth-slide ${i === 0 ? "active" : ""}"><h2>${slide.title}</h2><p>${slide.text}</p></article>`).join("")}</div>
+<div class="auth-dots" id="authDots">${AUTH_SLIDES.map((_, i) => `<button class="auth-dot ${i === 0 ? "active" : ""}" type="button" data-auth-dot="${i}" aria-label="Show message ${i + 1}"></button>`).join("")}</div>
+</aside>
+<div class="auth-panel">
+<button class="auth-back link-btn" type="button" data-route="home">← Back to shop</button>
+<img class="auth-logo" src="assets/logo.png" alt="The Smiling Worm by Mhow Organics" />
+${form}
+${notice}
+</div>
+</div></div></section>`;
 }
 function accountPage() {
   const a = state.account || {};
-  if (!state.accountToken)
-    return `${pageHeader("Your Account", "Create a secure store account or sign in to save your details.")}<section class="section"><div class="container account-auth-grid"><div class="panel"><h2>Sign in</h2><p class="muted">Use your email and password.</p><form id="accountLoginForm" class="form-grid"><div class="field full"><label>Email</label><input name="email" type="email" autocomplete="email" required /></div><div class="field full"><label>Password</label><input name="password" type="password" autocomplete="current-password" required /></div><div class="field full"><button class="btn" type="submit">Sign in</button></div></form><button class="link-btn" id="showForgotPassword" type="button">Forgot password?</button><form id="forgotPasswordForm" class="form-grid" hidden><div class="field full"><label>Phone number used for your account</label><input name="phone" type="tel" autocomplete="tel" required /></div><div class="field full" data-reset-step hidden><label>OTP</label><input name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" /></div><div class="field" data-reset-step hidden><label>New password</label><input name="password" type="password" minlength="8" autocomplete="new-password" /></div><div class="field" data-reset-step hidden><label>Confirm password</label><input name="confirmPassword" type="password" minlength="8" autocomplete="new-password" /></div><div class="field full"><button class="btn" type="submit">Send OTP</button><p class="muted" data-reset-status role="status"></p></div></form></div><div class="panel"><h2>Create account</h2><p class="muted">Your password is stored securely on the server.</p><form id="accountRegisterForm" class="form-grid"><div class="field"><label>Password</label><input name="password" type="password" minlength="8" autocomplete="new-password" required /></div><div class="field"><label>Confirm password</label><input name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required /></div><div class="field"><label>Full name</label><input name="name" autocomplete="name" required /></div><div class="field"><label>Email</label><input name="email" type="email" autocomplete="email" required /></div><div class="field full"><label>Phone number</label><input name="phone" type="tel" autocomplete="tel" required /></div><div class="field full"><button class="btn" type="submit">Create account</button></div></form></div></div></section>`;
-  return `${pageHeader("Your Account", `Signed in as ${escapeHtml(a.email || "customer")}.`)}<section class="section"><div class="container panel"><div class="account-header"><div><h2>Account details</h2><p class="muted">Your saved details are used to speed up checkout.</p></div><button class="btn outline" type="button" id="accountLogout">Sign out</button></div><form id="accountForm" class="form-grid"><div class="field"><label>Full name</label><input name="name" value="${escapeHtml(a.name)}" required /></div><div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(a.email)}" required /></div><div class="field"><label>Phone number</label><input name="phone" value="${escapeHtml(a.phone)}" required /></div><div class="field"><label>Company (optional)</label><input name="company" value="${escapeHtml(a.company)}" /></div><div class="field full"><label>House / Flat</label><input name="house" value="${escapeHtml(a.house)}" /></div><div class="field"><label>Street</label><input name="street" value="${escapeHtml(a.street)}" /></div><div class="field"><label>City</label><input name="city" value="${escapeHtml(a.city)}" /></div><div class="field"><label>State</label><select name="state" data-location-state>${stateOptions(a.state)}</select></div><div class="field"><label>Pincode</label><input name="pincode" value="${escapeHtml(a.pincode)}" /></div><div class="field"><label>Country</label><input name="country" value="${escapeHtml(a.country || "India")}" /></div><div class="field full"><button class="btn" type="submit">Save account details</button></div></form></div></section>`;
+  if (!state.accountToken) return authScreen();
+  const emailField = auth.usesSupabase
+    ? `<div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(a.email)}" readonly /><small class="muted">Your email is your sign-in ID and can be changed from Supabase.</small></div>`
+    : `<div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(a.email)}" required /></div>`;
+  return `${pageHeader("Your Account", `Signed in as ${escapeHtml(a.email || "customer")}.`)}<section class="section"><div class="container panel"><div class="account-header"><div><h2>Account details</h2><p class="muted">Your saved details are used to speed up checkout.</p></div><button class="btn outline" type="button" id="accountLogout">Sign out</button></div><form id="accountForm" class="form-grid"><div class="field"><label>Full name</label><input name="name" value="${escapeHtml(a.name)}" required /></div>${emailField}<div class="field"><label>Phone number</label><input name="phone" value="${escapeHtml(a.phone)}" required /></div><div class="field"><label>Company (optional)</label><input name="company" value="${escapeHtml(a.company)}" /></div><div class="field full"><label>House / Flat</label><input name="house" value="${escapeHtml(a.house)}" /></div><div class="field"><label>Street</label><input name="street" value="${escapeHtml(a.street)}" /></div><div class="field"><label>City</label><input name="city" value="${escapeHtml(a.city)}" /></div><div class="field"><label>State</label><select name="state" data-location-state>${stateOptions(a.state)}</select></div><div class="field"><label>Pincode</label><input name="pincode" value="${escapeHtml(a.pincode)}" /></div><div class="field"><label>Country</label><input name="country" value="${escapeHtml(a.country || "India")}" /></div><div class="field full"><button class="btn" type="submit">Save account details</button></div></form></div></section>`;
+}
+function setupAuthSlides() {
+  const slides = document.getElementById("authSlides");
+  const dots = document.getElementById("authDots");
+  clearInterval(window.authSlideTimer);
+  if (!slides || !dots) return;
+  const items = [...slides.querySelectorAll(".auth-slide")];
+  const buttons = [...dots.querySelectorAll("[data-auth-dot]")];
+  const go = (next) => {
+    state.authSlide = (next + items.length) % items.length;
+    items.forEach((item, i) => item.classList.toggle("active", i === state.authSlide));
+    buttons.forEach((dot, i) => dot.classList.toggle("active", i === state.authSlide));
+  };
+  buttons.forEach((dot) => (dot.onclick = () => go(Number(dot.dataset.authDot))));
+  go(state.authSlide || 0);
+  window.authSlideTimer = setInterval(() => go(state.authSlide + 1), 5200);
 }
 function checkoutPage() {
   if (!state.cart.length)
@@ -654,6 +901,9 @@ function storyPage() {
 function render() {
   const route = location.hash.replace(/^#/, "") || "home";
   state.subcat = state.subcat || "all";
+  // Leaving the account page always returns it to the sign-in view,
+  // however the visitor navigated away (link, hash or browser back).
+  if (route !== "account") state.authView = "signin";
   let html = "";
   if (route === "home") html = home();
   else if (route === "cart") html = cartPage();
@@ -777,6 +1027,7 @@ function render() {
   bindProductEvents(app);
   setupHero();
   startCountdown();
+  setupAuthSlides();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function resetCategoryFilters() {
@@ -885,6 +1136,13 @@ function bindGlobal(root = document) {
         if (order) downloadInvoice(order);
       }),
   );
+  root.querySelectorAll("[data-auth-view]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        state.authView = b.dataset.authView;
+        render();
+      }),
+  );
   const af = document.getElementById("accountForm");
   if (af)
     af.onsubmit = async (e) => {
@@ -892,8 +1150,7 @@ function bindGlobal(root = document) {
       const button = af.querySelector("button[type=submit]");
       button.disabled = true;
       try {
-        state.account = await storeApi("/account", { method: "PATCH", body: JSON.stringify(Object.fromEntries(new FormData(af))) });
-        save();
+        await auth.saveProfile(Object.fromEntries(new FormData(af)));
         toast("Account details saved");
       } catch (error) {
         toast(error.message);
@@ -905,14 +1162,12 @@ function bindGlobal(root = document) {
   if (loginForm)
     loginForm.onsubmit = async (e) => {
       e.preventDefault();
+      const data = Object.fromEntries(new FormData(loginForm));
       const button = loginForm.querySelector("button[type=submit]");
       button.disabled = true;
       try {
-        const result = await storeApi("/auth/login", { method: "POST", body: JSON.stringify(Object.fromEntries(new FormData(loginForm))) });
-        state.accountToken = result.token;
-        sessionStorage.setItem("tsw-account-token", state.accountToken);
-        state.account = result.account;
-        save();
+        await auth.signIn(String(data.email || "").trim().toLowerCase(), data.password);
+        toast("Signed in");
         render();
       } catch (error) {
         toast(error.message);
@@ -920,46 +1175,33 @@ function bindGlobal(root = document) {
         button.disabled = false;
       }
     };
-  const forgotPasswordButton = document.getElementById("showForgotPassword");
-  const forgotPasswordForm = document.getElementById("forgotPasswordForm");
-  if (forgotPasswordButton && forgotPasswordForm) {
-    let resetStage = "request";
-    let challengeId = "";
-    let resetToken = "";
-    forgotPasswordButton.onclick = () => {
-      forgotPasswordForm.hidden = !forgotPasswordForm.hidden;
-      if (!forgotPasswordForm.hidden) forgotPasswordForm.querySelector("input").focus();
-    };
-    forgotPasswordForm.onsubmit = async (e) => {
+  const registerForm = document.getElementById("accountRegisterForm");
+  if (registerForm)
+    registerForm.onsubmit = async (e) => {
       e.preventDefault();
-      const button = forgotPasswordForm.querySelector("button[type=submit]");
-      const data = Object.fromEntries(new FormData(forgotPasswordForm));
+      const data = Object.fromEntries(new FormData(registerForm));
+      const status = registerForm.querySelector("[data-auth-status]");
+      if (String(data.password || "").length < 8) {
+        toast("Password must be at least 8 characters");
+        return;
+      }
+      if (data.password !== data.confirmPassword) {
+        toast("Passwords do not match");
+        return;
+      }
+      const button = registerForm.querySelector("button[type=submit]");
       button.disabled = true;
       try {
-        if (resetStage === "request") {
-          const result = await storeApi("/auth/forgot-password", { method: "POST", body: JSON.stringify({ phone: data.phone }) });
-          challengeId = result.challengeId;
-          resetStage = "reset";
-          forgotPasswordForm.querySelectorAll("[data-reset-step]").forEach((element) => { element.hidden = false; });
-          forgotPasswordForm.querySelector("[data-reset-status]").textContent = result.debugOtp ? `Development OTP: ${result.debugOtp}` : "OTP sent to your registered phone number.";
-          button.textContent = "Reset password";
-          forgotPasswordForm.querySelector("[name=otp]").required = true;
-          forgotPasswordForm.querySelector("[name=password]").required = true;
-          forgotPasswordForm.querySelector("[name=confirmPassword]").required = true;
+        const result = await auth.signUp(data);
+        if (result.needsConfirmation) {
+          registerForm.reset();
+          if (status)
+            status.textContent =
+              "Almost there — check your inbox and click the confirmation link, then sign in.";
+          toast("Confirmation email sent");
         } else {
-          if (data.password !== data.confirmPassword) throw new Error("Passwords do not match");
-          const verified = await storeApi("/auth/verify-reset-otp", { method: "POST", body: JSON.stringify({ challengeId, otp: data.otp }) });
-          resetToken = verified.resetToken;
-          await storeApi("/auth/reset-password", { method: "POST", body: JSON.stringify({ resetToken, password: data.password }) });
-          toast("Password reset. You can sign in now.");
-          forgotPasswordForm.reset();
-          resetStage = "request";
-          challengeId = "";
-          resetToken = "";
-          forgotPasswordForm.querySelectorAll("[data-reset-step]").forEach((element) => { element.hidden = true; });
-          forgotPasswordForm.querySelector("[data-reset-status]").textContent = "";
-          button.textContent = "Send OTP";
-          forgotPasswordForm.hidden = true;
+          toast("Welcome to The Smiling Worm");
+          render();
         }
       } catch (error) {
         toast(error.message);
@@ -967,27 +1209,31 @@ function bindGlobal(root = document) {
         button.disabled = false;
       }
     };
-  }
-  const registerForm = document.getElementById("accountRegisterForm");
-  if (registerForm)
-    registerForm.onsubmit = async (e) => {
+  const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+  if (forgotPasswordForm)
+    forgotPasswordForm.onsubmit = async (e) => {
       e.preventDefault();
-      const data = Object.fromEntries(new FormData(registerForm));
-      if (data.password !== data.confirmPassword) {
-        toast("Passwords do not match");
+      const email = String(
+        new FormData(forgotPasswordForm).get("email") || "",
+      )
+        .trim()
+        .toLowerCase();
+      const status = forgotPasswordForm.querySelector("[data-reset-status]");
+      const button = forgotPasswordForm.querySelector("button[type=submit]");
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        toast("Enter a valid email address");
         return;
       }
-      delete data.confirmPassword;
-      const button = registerForm.querySelector("button[type=submit]");
       button.disabled = true;
+      if (status) status.textContent = "Sending your reset link...";
       try {
-        const result = await storeApi("/auth/register", { method: "POST", body: JSON.stringify(data) });
-        state.accountToken = result.token;
-        sessionStorage.setItem("tsw-account-token", state.accountToken);
-        state.account = result.account;
-        save();
-        render();
+        await auth.sendResetLink(email);
+        forgotPasswordForm.reset();
+        if (status)
+          status.textContent = `If an account exists for ${email}, a password reset link is on its way. The link expires in 1 hour.`;
+        toast("Reset link sent");
       } catch (error) {
+        if (status) status.textContent = "";
         toast(error.message);
       } finally {
         button.disabled = false;
@@ -996,15 +1242,9 @@ function bindGlobal(root = document) {
   const logoutButton = document.getElementById("accountLogout");
   if (logoutButton)
     logoutButton.onclick = async () => {
-      try {
-        await storeApi("/auth/logout", { method: "POST" });
-      } catch (error) {
-        // Clear the local session even if the server session has expired.
-      }
-      state.accountToken = "";
-      state.account = {};
-      sessionStorage.removeItem("tsw-account-token");
-      save();
+      await auth.signOut();
+      state.authView = "signin";
+      toast("Signed out");
       render();
     };
   const supportForm = document.getElementById("supportForm");

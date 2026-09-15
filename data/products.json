@@ -7,9 +7,9 @@
     "image": "/uploads/products/product-1.png",
     "price": 3000,
     "description": "Vermicompost made with worm",
-    "stock": 5000,
+    "stock": 4990,
     "active": true,
-    "updatedAt": "2026-09-13T11:30:17.578Z",
+    "updatedAt": "2026-09-15T13:16:45.666Z",
     "newArrival": true,
     "bestseller": false
   },
@@ -371,9 +371,9 @@
     "image": "assets/images/products/product-031.svg",
     "price": 120,
     "description": "ADD PRODUCT DETAILS",
-    "stock": 450,
+    "stock": 444,
     "active": true,
-    "updatedAt": "2026-09-13T11:26:06.146Z",
+    "updatedAt": "2026-09-15T13:16:45.666Z",
     "newArrival": false,
     "bestseller": false
   },

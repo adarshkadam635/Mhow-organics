@@ -15,6 +15,7 @@
     {
       "src": "/admin",
       "dest": "server.js"
-    }
+    },
+    { "handle": "filesystem" }
   ]
 }

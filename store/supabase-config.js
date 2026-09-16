@@ -27,8 +27,8 @@
    before going live.
    ============================================================= */
 window.SUPABASE_CONFIG = {
-  url: "YOUR_SUPABASE_PROJECT_URL",
-  anonKey: "YOUR_SUPABASE_ANON_KEY",
+  url: "https://ovjrptofvdoandochbsw.supabase.co",
+  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92anJwdG9mdmRvYW5kb2NoYnN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Njg0MjgsImV4cCI6MjEwNTE0NDQyOH0.yz_J6b3_LguW12L5Dd75nC6oLI1cOng8TLOMkv3H8FU",
   // Where the emailed password-reset link should land. Leave as is
   // to use this site's own reset page on whatever domain it runs on.
   resetRedirectPath: "/store/reset-password.html",

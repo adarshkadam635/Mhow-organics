@@ -816,13 +816,17 @@ ${notice}
 </div>
 </div></div></section>`;
 }
+function returnsPage() {
+  if (!state.accountToken) return authScreen();
+  return `${pageHeader("Returns & Refunds", "See the products you have bought and request a return for eligible items.")}${returnsSectionHtml()}`;
+}
 function accountPage() {
   const a = state.account || {};
   if (!state.accountToken) return authScreen();
   const emailField = auth.usesSupabase
     ? `<div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(a.email)}" readonly /><small class="muted">Your email is your sign-in ID and can be changed from Supabase.</small></div>`
     : `<div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(a.email)}" required /></div>`;
-  return `${pageHeader("Your Account", `Signed in as ${escapeHtml(a.email || "customer")}.`)}<section class="section"><div class="container panel"><div class="account-header"><div><h2>Account details</h2><p class="muted">Your saved details are used to speed up checkout.</p></div><button class="btn outline" type="button" id="accountLogout">Sign out</button></div><form id="accountForm" class="form-grid"><div class="field"><label>Full name</label><input name="name" value="${escapeHtml(a.name)}" required /></div>${emailField}<div class="field"><label>Phone number</label><input name="phone" value="${escapeHtml(a.phone)}" required /></div><div class="field"><label>Company (optional)</label><input name="company" value="${escapeHtml(a.company)}" /></div><div class="field full"><label>House / Flat</label><input name="house" value="${escapeHtml(a.house)}" /></div><div class="field"><label>Street</label><input name="street" value="${escapeHtml(a.street)}" /></div><div class="field"><label>City</label><input name="city" value="${escapeHtml(a.city)}" /></div><div class="field"><label>State</label><select name="state" data-location-state>${stateOptions(a.state)}</select></div><div class="field"><label>Pincode</label><input name="pincode" value="${escapeHtml(a.pincode)}" /></div><div class="field"><label>Country</label><input name="country" value="${escapeHtml(a.country || "India")}" /></div><div class="field full"><button class="btn" type="submit">Save account details</button></div></form></div></section>`;
+  return `${pageHeader("Your Account", `Signed in as ${escapeHtml(a.email || "customer")}.`)}<section class="section"><div class="container panel"><div class="account-header"><div><h2>Account details</h2><p class="muted">Your saved details are used to speed up checkout.</p></div><button class="btn outline" type="button" id="accountLogout">Sign out</button></div><form id="accountForm" class="form-grid"><div class="field"><label>Full name</label><input name="name" value="${escapeHtml(a.name)}" required /></div>${emailField}<div class="field"><label>Phone number</label><input name="phone" value="${escapeHtml(a.phone)}" required /></div><div class="field"><label>Company (optional)</label><input name="company" value="${escapeHtml(a.company)}" /></div><div class="field full"><label>House / Flat</label><input name="house" value="${escapeHtml(a.house)}" /></div><div class="field"><label>Street</label><input name="street" value="${escapeHtml(a.street)}" /></div><div class="field"><label>City</label><input name="city" value="${escapeHtml(a.city)}" /></div><div class="field"><label>State</label><select name="state" data-location-state>${stateOptions(a.state)}</select></div><div class="field"><label>Pincode</label><input name="pincode" value="${escapeHtml(a.pincode)}" /></div><div class="field"><label>Country</label><input name="country" value="${escapeHtml(a.country || "India")}" /></div><div class="field full"><button class="btn" type="submit">Save account details</button></div></form></div></section>${returnsSectionHtml()}`;
 }
 function setupAuthSlides() {
   const slides = document.getElementById("authSlides");
@@ -855,14 +859,14 @@ function checkoutPage() {
     )}<div id="checkoutTaxRows">${taxRows(totals, "checkout")}</div><div class="sum-row"><span>Shipping</span><strong id="checkoutShipping">${totals.shipping ? money(totals.shipping) : "Free"}</strong></div><div class="sum-row total"><span>Total</span><strong id="checkoutTotal">${money(totals.total)}</strong></div></aside></div></section>`;
 }
 function orderConfirmation(order) {
-  return `${pageHeader("Order confirmed!", "Thank you for choosing The Smiling Worm. Your order is saved locally for this demo.")}<section class="section"><div class="container panel"><div style="text-align:center;max-width:720px;margin:0 auto"><div style="font-size:70px">🌿</div><h2>Thanks, ${order.name || "gardener"}!</h2><p>Your order <strong>${order.id}</strong> has been captured as a checkout demo. Payment is marked pending until your payment provider is connected.</p><div class="info-grid" style="margin-top:28px;text-align:left"><div class="info-card"><h3>Order total</h3><p><strong>${money(order.total)}</strong></p></div><div class="info-card"><h3>Payment</h3><p>Pending · connect provider API</p></div><div class="info-card"><h3>Delivery</h3><p>${order.city || ""}, ${order.state || ""} ${order.pincode || ""}</p></div></div><button class="btn" data-download-invoice style="margin-top:22px">Download Invoice</button><button class="btn outline" data-route="home" style="margin:22px 0 0 8px">Continue Shopping</button></div></div></section>`;
+  return `${pageHeader("Order confirmed!", "Thank you for choosing The Smiling Worm. Your order is saved locally for this demo.")}<section class="section"><div class="container panel"><div style="text-align:center;max-width:720px;margin:0 auto"><div style="font-size:70px">🌿</div><h2>Thanks, ${order.name || "gardener"}!</h2><p>Your order <strong>${order.id}</strong> has been captured as a checkout demo. Payment is marked pending until your payment provider is connected.</p><div class="info-grid" style="margin-top:28px;text-align:left"><div class="info-card"><h3>Order total</h3><p><strong>${money(order.total)}</strong></p></div><div class="info-card"><h3>Payment</h3><p>Pending · connect provider API</p></div><div class="info-card"><h3>Delivery</h3><p>${order.city || ""}, ${order.state || ""} ${order.pincode || ""}</p></div></div>${(order.items || []).some((i) => isFertilizerProduct(productById(i.id))) ? `<p class="return-fertilizer-note" role="note" style="text-align:left;margin-top:22px"><strong>Non-returnable:</strong> ${FERTILIZER_NOTICE}</p>` : ""}<button class="btn" data-download-invoice style="margin-top:22px">Download Invoice</button><button class="btn outline" data-route="home" style="margin:22px 0 0 8px">Continue Shopping</button></div></div></section>`;
 }
 function renderProduct(id) {
   const p = productById(id);
   if (!p) return notFound();
   const returnRoute = location.hash.replace(/^#/, "") || "home";
   document.getElementById("app").innerHTML =
-    `${pageHeader(p.name, p.category)}<section class="section"><div class="container checkout-layout"><div class="panel product-detail-image" style="display:grid;place-items:center;min-height:420px;background:linear-gradient(145deg,#edf4e8,#dbe7dd);overflow:hidden"><img src="${p.images[0]}" alt="${p.name.replace(/"/g, "&quot;")}" style="width:100%;height:100%;min-height:420px;object-fit:cover" onerror="this.src='assets/images/products/product-${String(p.id).padStart(3, "0")}.svg'"></div><div class="panel"><span class="eyebrow" style="color:var(--green);background:var(--sage);border:0">${p.badge || p.category}</span><h2 style="font-size:36px">${p.name}</h2><p style="color:var(--muted)">${p.description}</p><div class="price-row" style="margin:20px 0"><span class="price" style="font-size:30px">${money(p.price)}</span>${p.originalPrice > p.price ? `<span class="old-price">${money(p.originalPrice)}</span><span class="discount">${p.discount}% off</span>` : ""}</div><p style="font-size:13px;color:var(--muted)">SKU: ${p.sku} · ${p.stock} available · ★ ${p.rating}</p><div class="qty-row" style="margin:24px 0"><div class="qty"><button id="pdDec">−</button><span id="pdQty">1</span><button id="pdInc">+</button></div><button class="btn" id="pdAdd">Add to Cart</button></div><button class="btn outline" id="pdWish">${isWish(p.id) ? "♥ Remove from wishlist" : "♡ Add to wishlist"}</button></div></div></section>`;
+    `${pageHeader(p.name, p.category)}<section class="section"><div class="container checkout-layout"><div class="panel product-detail-image" style="display:grid;place-items:center;min-height:420px;background:linear-gradient(145deg,#edf4e8,#dbe7dd);overflow:hidden"><img src="${p.images[0]}" alt="${p.name.replace(/"/g, "&quot;")}" style="width:100%;height:100%;min-height:420px;object-fit:cover" onerror="this.src='assets/images/products/product-${String(p.id).padStart(3, "0")}.svg'"></div><div class="panel"><span class="eyebrow" style="color:var(--green);background:var(--sage);border:0">${p.badge || p.category}</span><h2 style="font-size:36px">${p.name}</h2><p style="color:var(--muted)">${p.description}</p><div class="price-row" style="margin:20px 0"><span class="price" style="font-size:30px">${money(p.price)}</span>${p.originalPrice > p.price ? `<span class="old-price">${money(p.originalPrice)}</span><span class="discount">${p.discount}% off</span>` : ""}</div>${isFertilizerProduct(p) ? `<p class="return-fertilizer-note" role="note"><strong>Non-returnable:</strong> ${FERTILIZER_NOTICE}</p>` : ""}<p style="font-size:13px;color:var(--muted)">SKU: ${p.sku} · ${p.stock} available · ★ ${p.rating}</p><div class="qty-row" style="margin:24px 0"><div class="qty"><button id="pdDec">−</button><span id="pdQty">1</span><button id="pdInc">+</button></div><button class="btn" id="pdAdd">Add to Cart</button></div><button class="btn outline" id="pdWish">${isWish(p.id) ? "♥ Remove from wishlist" : "♡ Add to wishlist"}</button></div></div></section>`;
   const productSection = document.querySelector("#app .section");
   const backButton = document.createElement("button");
   backButton.className = "link-btn product-back";
@@ -903,12 +907,13 @@ function render() {
   state.subcat = state.subcat || "all";
   // Leaving the account page always returns it to the sign-in view,
   // however the visitor navigated away (link, hash or browser back).
-  if (route !== "account") state.authView = "signin";
+  if (route !== "account" && route !== "returns") state.authView = "signin";
   let html = "";
   if (route === "home") html = home();
   else if (route === "cart") html = cartPage();
   else if (route === "wishlist") html = wishlistPage();
   else if (route === "account") html = accountPage();
+  else if (route === "returns") html = returnsPage();
   else if (route === "checkout") html = checkoutPage();
   else if (route === "bestsellers")
     html = listingPage(
@@ -1028,6 +1033,7 @@ function render() {
   setupHero();
   startCountdown();
   setupAuthSlides();
+  if (route === "account" || route === "returns") window.initReturnsSection?.();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function resetCategoryFilters() {
@@ -1310,7 +1316,7 @@ function bindGlobal(root = document) {
       try {
         const response = await fetch("../api/orders", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...(state.accountToken ? { Authorization: `Bearer ${state.accountToken}` } : {}) },
           body: JSON.stringify({
             ...data,
             address: [

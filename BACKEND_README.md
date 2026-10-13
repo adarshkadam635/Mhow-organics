@@ -46,7 +46,7 @@ npm install
 npm start
 ```
 
-Open `http://localhost:3000/` for the website and `http://localhost:3000/admin` for the admin panel. The admin panel currently opens directly without a password.
+Open `http://localhost:3000/` for the website and `http://localhost:3000/admin` for the admin panel. Sign in to the admin panel with `ADMIN_USER` / `ADMIN_PASSWORD` from `.env` (login is disabled until they are set).
 
 On first run, if the `products` table is empty, the server seeds it from
 `store/product_inventory.csv` automatically (0 stock, blank descriptions —
@@ -103,3 +103,13 @@ Password reset flow: the customer clicks **Forgot password?**, enters their emai
 Until `store/supabase-config.js` has real values, the Account page keeps using this server's own sign-in (`/api/store/auth/*`, backed by the `store_accounts` table).
 
 Before deployment, set a strong `ADMIN_PASSWORD` and put the server behind HTTPS.
+
+## Returns & Refunds
+
+Run `supabase/migrations/001_return_requests.sql` once in the Supabase SQL Editor
+(safe to re-run). It adds `products.is_returnable`, `orders.account_id`, the
+`return_requests`, `return_status_history` and `notifications` tables, two
+transactional functions, and a private `return-evidence` storage bucket.
+Fertilizers are always non-returnable (enforced in `lib/returns.js`). Customers
+use Account -> Returns & Refunds; admins use the **Return Requests** tab. Tests:
+`npm test`.

@@ -106,7 +106,14 @@ async function api(path, options = {}) {
     },
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw Error(data.error || "Request failed");
+  // An expired or revoked admin session sends the user back to the login form.
+  if (res.status === 401 && state.token && path !== "/auth/login") {
+    state.token = null;
+    localStorage.removeItem("mo-admin-token");
+    setLoggedIn(false);
+    $("#loginError").textContent = "Session expired. Please log in again.";
+  }
+  if (!res.ok) throw Error(data.error || `Server error (${res.status}). Make sure the site is running with "npm start", not a plain static file server.`);
   return data;
 }
 function setLoggedIn(on) {
@@ -175,6 +182,7 @@ function render(tab) {
     content.innerHTML = `<div class="panel"><div class="toolbar"><h2>Enquiries</h2><div class="toolbar-actions"><button class="ghost small" data-download-enquiries>Download Excel</button><button class="ghost small" data-clear-enquiries>Clear enquiries</button></div></div><table class="table"><thead><tr><th>Received</th><th>Person</th><th>Type</th><th>Message</th><th>Status</th></tr></thead><tbody>${state.enquiries.map((e) => `<tr><td>${new Date(e.createdAt).toLocaleString()}</td><td>${e.name}<br>${e.email || ""}<br>${e.phone || ""}</td><td><span class="badge">${e.type}</span><br><small>${e.phone || "No phone provided"}</small></td><td>${e.subject || ""}<br>${e.message}</td><td><select data-enquiry="${e.id}"><option ${e.status === "new" ? "selected" : ""}>new</option><option ${e.status === "in-progress" ? "selected" : ""}>in-progress</option><option ${e.status === "resolved" ? "selected" : ""}>resolved</select></td></tr>`).join("")}</tbody></table></div>`;
   if (tab === "orders")
     content.innerHTML = `<div class="panel"><div class="toolbar"><h2>Orders (${state.orders.length})</h2><button class="ghost small" data-clear-orders>Clear orders</button></div><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Address</th><th>Received</th><th>Status</th><th>Shiprocket</th><th>Invoice</th></tr></thead><tbody>${state.orders.map((o) => { const noteTotal = String(o.note || "").match(/Store total:\s*([\d.]+)/i)?.[1]; const total = Number(o.total) || Number(noteTotal) || 0; const items = Array.isArray(o.items) ? o.items : []; return `<tr><td>${o.id}</td><td>${o.name}<br>${o.phone}<br>${o.email || ""}</td><td>${items.map((i) => `${state.products.find((p) => p.id === String(i.id))?.name || `Product ${i.id}`} × ${i.qty}`).join(", ") || "No items recorded"}</td><td><strong>₹${total.toLocaleString("en-IN")}</strong></td><td>${o.address || "Not provided"}</td><td>${new Date(o.createdAt).toLocaleString()}</td><td><select data-order="${o.id}">${["new", "confirmed", "packed", "shipped", "completed", "cancelled"].map((s) => `<option ${o.status === s ? "selected" : ""}>${s}</option>`).join("")}</select></td><td>${o.shiprocket?.orderId ? `<span class="badge">Forwarded</span><br><small>${o.shiprocket.orderId}</small>` : `<button class="small" data-shiprocket="${o.id}">Forward to Shiprocket</button>`}</td><td><button class="ghost small" data-order-invoice="${o.id}">Download invoice</button></td></tr>`; }).join("")}</tbody></table></div>`;
+  if (tab === "returns") return void window.renderReturnsTab();
   bindStatusHandlers();
 }
 function renderProducts() {
@@ -190,7 +198,7 @@ function renderProducts() {
       (p) => {
         const imagePath = p.image?.startsWith("/") ? p.image : `../${p.image || ""}`;
         const placement = p.newArrival ? "newArrival" : p.bestseller ? "bestseller" : "";
-        return `<form class="panel edit-grid" data-product="${p.id}"><label>Name<input name="name" value="${p.name.replaceAll('"', "&quot;")}"></label><label>Category<select name="category">${categoryOptions(p.category)}</select></label><label>Subcategory<input name="subcategory" value="${(p.subcategory || "").replaceAll('"', "&quot;")}" placeholder="e.g. Wooden Planters"></label><label>Store section<select name="placement"><option value="" ${!placement ? "selected" : ""}>Standard</option><option value="newArrival" ${placement === "newArrival" ? "selected" : ""}>New arrival</option><option value="bestseller" ${placement === "bestseller" ? "selected" : ""}>Bestseller</option></select></label><label>Price<input name="price" type="number" min="0" value="${p.price}"></label><label>Stock<input name="stock" type="number" min="0" value="${p.stock}"></label><label class="wide">Description<textarea name="description">${p.description}</textarea></label><div class="wide image-upload" tabindex="0"><div class="image-preview"><img src="${imagePath}" alt="Current ${p.name.replaceAll('"', "&quot;")} image"><div><strong>Product picture</strong><small class="muted">Paste an image here or use PNG, JPG, WEBP or GIF up to 8 MB</small></div></div><label class="upload-button" for="image-${p.id}">Add picture<input id="image-${p.id}" name="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></label></div><label>Active<select name="active"><option value="true" ${p.active ? "selected" : ""}>Visible</option><option value="false" ${!p.active ? "selected" : ""}>Hidden</option></select></label><div class="save-row"><span class="save-status" aria-live="polite"></span><button class="save small">Save product ${p.id}</button></div></form>`;
+        return `<form class="panel edit-grid" data-product="${p.id}"><label>Name<input name="name" value="${p.name.replaceAll('"', "&quot;")}"></label><label>Category<select name="category">${categoryOptions(p.category)}</select></label><label>Subcategory<input name="subcategory" value="${(p.subcategory || "").replaceAll('"', "&quot;")}" placeholder="e.g. Wooden Planters"></label><label>Store section<select name="placement"><option value="" ${!placement ? "selected" : ""}>Standard</option><option value="newArrival" ${placement === "newArrival" ? "selected" : ""}>New arrival</option><option value="bestseller" ${placement === "bestseller" ? "selected" : ""}>Bestseller</option></select></label><label>Price<input name="price" type="number" min="0" value="${p.price}"></label><label>Stock<input name="stock" type="number" min="0" value="${p.stock}"></label><label class="wide">Description<textarea name="description">${p.description}</textarea></label><div class="wide image-upload" tabindex="0"><div class="image-preview"><img src="${imagePath}" alt="Current ${p.name.replaceAll('"', "&quot;")} image"><div><strong>Product picture</strong><small class="muted">Paste an image here or use PNG, JPG, WEBP or GIF up to 8 MB</small></div></div><label class="upload-button" for="image-${p.id}">Add picture<input id="image-${p.id}" name="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></label></div><label>Returns<select name="isReturnable"><option value="" ${p.isReturnable == null ? "selected" : ""}>Default (fertilizers never returnable)</option><option value="true" ${p.isReturnable === true ? "selected" : ""}>Returnable</option><option value="false" ${p.isReturnable === false ? "selected" : ""}>Non-returnable</option></select></label><label>Active<select name="active"><option value="true" ${p.active ? "selected" : ""}>Visible</option><option value="false" ${!p.active ? "selected" : ""}>Hidden</option></select></label><div class="save-row"><span class="save-status" aria-live="polite"></span><button class="save small">Save product ${p.id}</button></div></form>`;
       },
     )
     .join("");
@@ -219,6 +227,7 @@ function renderProducts() {
         formData.delete("imageFile");
         const body = Object.fromEntries(formData);
         body.active = body.active === "true";
+        body.isReturnable = body.isReturnable === "" ? null : body.isReturnable === "true";
         body.newArrival = body.placement === "newArrival";
         body.bestseller = body.placement === "bestseller";
         delete body.placement;
@@ -391,7 +400,7 @@ async function startDashboard() {
 
 startDashboard();
 window.setInterval(() => {
-  if (document.visibilityState === "visible" && state.token && currentTab !== "products" && currentTab !== "customers") {
+  if (document.visibilityState === "visible" && state.token && currentTab !== "products" && currentTab !== "customers" && currentTab !== "returns") {
     load().catch(() => {});
   }
 }, 30000);

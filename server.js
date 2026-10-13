@@ -7,11 +7,14 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const supabaseAdmin = require("./lib/supabaseAdmin");
+const registerReturnRoutes = require("./lib/returns");
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 3000);
-const ADMIN_USER = process.env.ADMIN_USER || "AdminMO";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "organics@911";
+// No built-in fallback credentials: admin login stays disabled until both are set in .env.
+const ADMIN_USER = process.env.ADMIN_USER || "";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
+const ADMIN_SESSION_MAX_AGE = 12 * 60 * 60 * 1000;
 const SHIPROCKET_EMAIL = process.env.SHIPROCKET_EMAIL || "";
 const SHIPROCKET_PASSWORD = process.env.SHIPROCKET_PASSWORD || "";
 const SHIPROCKET_PICKUP_LOCATION = process.env.SHIPROCKET_PICKUP_LOCATION || "Primary";
@@ -38,10 +41,10 @@ function csvFields(line) {
 }
 
 function fromProductRow(row) {
-  return { id: row.id, category: row.category, subcategory: row.subcategory, name: row.name, image: row.image, price: Number(row.price) || 0, description: row.description, stock: row.stock, active: row.active, newArrival: row.new_arrival, bestseller: row.bestseller, updatedAt: row.updated_at };
+  return { id: row.id, category: row.category, subcategory: row.subcategory, name: row.name, image: row.image, price: Number(row.price) || 0, description: row.description, stock: row.stock, active: row.active, newArrival: row.new_arrival, bestseller: row.bestseller, isReturnable: row.is_returnable, updatedAt: row.updated_at };
 }
 function toProductRow(product) {
-  return { id: product.id, category: product.category, subcategory: product.subcategory, name: product.name, image: product.image, price: product.price, description: product.description, stock: product.stock, active: product.active, new_arrival: product.newArrival, bestseller: product.bestseller, updated_at: product.updatedAt };
+  return { id: product.id, category: product.category, subcategory: product.subcategory, name: product.name, image: product.image, price: product.price, description: product.description, stock: product.stock, active: product.active, new_arrival: product.newArrival, bestseller: product.bestseller, is_returnable: product.isReturnable, updated_at: product.updatedAt };
 }
 function fromEnquiryRow(row) {
   return { id: row.id, type: row.type, name: row.name, email: row.email, phone: row.phone, city: row.city, subject: row.subject, message: row.message, status: row.status, createdAt: row.created_at };
@@ -105,7 +108,11 @@ async function deleteSession(token) {
 async function auth(req, res, next) {
   const token = req.headers.authorization?.replace("Bearer ", "");
   const session = await getSession(token);
-  if (!session || session.role !== "admin") return res.status(401).json({ error: "Authentication required" });
+  if (!session || session.role !== "admin" || Date.now() - new Date(session.created_at).getTime() > ADMIN_SESSION_MAX_AGE) {
+    if (session && token) await deleteSession(token);
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  req.admin = { username: session.username || ADMIN_USER };
   next();
 }
 async function customerAuth(req, res, next) {
@@ -117,6 +124,36 @@ async function customerAuth(req, res, next) {
   }
   req.customer = { accountId: session.account_id };
   next();
+}
+// Accepts either a local store session token or a Supabase Auth access token
+// (the storefront uses the latter whenever store/supabase-config.js is filled in).
+async function customerAuthAny(req, res, next) {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    const customer = token ? await resolveCustomer(token) : null;
+    if (!customer) return res.status(401).json({ error: "Please sign in to your store account" });
+    req.customer = customer;
+    next();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+async function resolveCustomer(token) {
+  let account = null;
+  const session = await getSession(token);
+  if (session) {
+    if (session.role !== "customer" || Date.now() - new Date(session.created_at).getTime() > CUSTOMER_SESSION_MAX_AGE) return null;
+    const { data } = await supabaseAdmin.from("store_accounts").select("*").eq("id", session.account_id).limit(1);
+    account = data?.[0] ? fromAccountRow(data[0]) : null;
+  } else if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` } }).catch(() => null);
+    const user = response?.ok ? await response.json().catch(() => null) : null;
+    if (!user?.id) return null;
+    const { data } = await supabaseAdmin.from("store_accounts").select("*").eq("supabase_id", user.id).limit(1);
+    account = data?.[0] ? fromAccountRow(data[0]) : await findAccountByEmail(clean(user.email, 160).toLowerCase());
+  }
+  if (!account) return null;
+  return { accountId: account.id, email: accountEmail(account), name: clean(account.profile?.name, 120) };
 }
 function clean(value, max = 2000) { return String(value ?? "").trim().slice(0, max); }
 function accountEmail(account) { return clean(account.profile?.email || account.email, 160).toLowerCase(); }
@@ -174,20 +211,27 @@ async function saveProductImage(productId, dataUrl) {
 }
 
 app.get("/api/health", (_req, res) => res.json({ ok: true, service: "mhow-organics" }));
-app.post("/api/auth/login", async (req, res) => {
+const sha = (value) => crypto.createHash("sha256").update(String(value)).digest();
+const safeEqual = (a, b) => crypto.timingSafeEqual(sha(a), sha(b));
+const tooMany = (message) => ({ windowMs: 15 * 60 * 1000, standardHeaders: true, legacyHeaders: false, message: { error: message } });
+const adminLoginLimiter = rateLimit({ ...tooMany("Too many login attempts. Try again in 15 minutes."), limit: 10, skipSuccessfulRequests: true });
+const storeAuthLimiter = rateLimit({ ...tooMany("Too many attempts. Please try again later."), limit: 20, skipSuccessfulRequests: true });
+const otpRequestLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, message: { error: "Too many reset requests. Please try again in an hour." } });
+app.use(["/api/store/auth/login", "/api/store/auth/register", "/api/store/auth/verify-reset-otp", "/api/store/auth/reset-password"], storeAuthLimiter);
+app.use("/api/store/auth/forgot-password", otpRequestLimiter);
+
+app.post("/api/auth/login", adminLoginLimiter, async (req, res) => {
+  if (!ADMIN_USER || !ADMIN_PASSWORD) return res.status(503).json({ error: "Admin login is not configured. Set ADMIN_USER and ADMIN_PASSWORD in .env." });
   const username = clean(req.body.username, 80);
-  const password = String(req.body.password || "");
-  if (username !== ADMIN_USER || password !== ADMIN_PASSWORD) return res.status(401).json({ error: "Invalid credentials" });
+  const password = String(req.body.password || "").slice(0, 200);
+  // Evaluate both comparisons so timing doesn't reveal which field was wrong.
+  const userOk = safeEqual(username, ADMIN_USER);
+  const passOk = safeEqual(password, ADMIN_PASSWORD);
+  if (!userOk || !passOk) return res.status(401).json({ error: "Invalid credentials" });
   const token = crypto.randomBytes(32).toString("hex");
   const { error } = await supabaseAdmin.from("sessions").insert({ token, role: "admin", username, created_at: new Date().toISOString() });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ token, username });
-});
-app.post("/api/auth/direct", async (_req, res) => {
-  const token = crypto.randomBytes(32).toString("hex");
-  const { error } = await supabaseAdmin.from("sessions").insert({ token, role: "admin", username: "admin", created_at: new Date().toISOString() });
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ token, username: "admin" });
 });
 app.post("/api/auth/logout", auth, async (req, res) => {
   await deleteSession(req.headers.authorization.replace("Bearer ", ""));
@@ -364,8 +408,8 @@ app.put("/api/products/:id", auth, async (req, res) => {
   if (fetchError) return res.status(500).json({ error: fetchError.message });
   if (!existingRows.length) return res.status(404).json({ error: "Product not found" });
   const current = fromProductRow(existingRows[0]);
-  const allowed = ["name", "category", "subcategory", "description", "price", "stock", "active", "newArrival", "bestseller", "image"];
-  for (const key of allowed) if (req.body[key] !== undefined) current[key] = key === "price" || key === "stock" ? Number(req.body[key]) || 0 : key === "active" || key === "newArrival" || key === "bestseller" ? Boolean(req.body[key]) : clean(req.body[key]);
+  const allowed = ["name", "category", "subcategory", "description", "price", "stock", "active", "newArrival", "bestseller", "image", "isReturnable"];
+  for (const key of allowed) if (req.body[key] !== undefined) current[key] = key === "price" || key === "stock" ? Number(req.body[key]) || 0 : key === "active" || key === "newArrival" || key === "bestseller" ? Boolean(req.body[key]) : key === "isReturnable" ? (req.body[key] === null ? null : Boolean(req.body[key])) : clean(req.body[key]);
   if (req.body.imageData) {
     try { current.image = await saveProductImage(current.id, req.body.imageData); }
     catch (error) { return res.status(400).json({ error: error.message }); }
@@ -430,7 +474,17 @@ app.post("/api/orders", async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
   }
   const record = { id: `MO-${Date.now().toString(36).toUpperCase()}`, name: clean(req.body.name, 120), phone: clean(req.body.phone, 40), email: clean(req.body.email, 160), address: clean(req.body.address, 500), city: clean(req.body.city, 120), state: clean(req.body.state, 120), pincode: clean(req.body.pincode, 20), country: clean(req.body.country, 80), total: Number(req.body.total) || 0, gst: Number(req.body.gst) || 0, igst: Number(req.body.igst) || 0, fertilizerTax: Number(req.body.fertilizerTax) || 0, woodenPlanterTax: Number(req.body.woodenPlanterTax) || 0, otherTax: Number(req.body.otherTax) || 0, items, backorderedItems, note: clean(req.body.note), status: "new", createdAt: new Date().toISOString() };
-  const { error: insertError } = await supabaseAdmin.from("orders").insert(toOrderRow(record));
+  // Link the order to the signed-in customer (if any) so it shows up under Returns & Refunds.
+  const orderRow = toOrderRow(record);
+  const orderToken = req.headers.authorization?.replace("Bearer ", "");
+  const orderCustomer = orderToken ? await resolveCustomer(orderToken).catch(() => null) : null;
+  if (orderCustomer) orderRow.account_id = orderCustomer.accountId;
+  let { error: insertError } = await supabaseAdmin.from("orders").insert(orderRow);
+  // Checkout must keep working before the returns migration adds orders.account_id.
+  if (insertError && orderRow.account_id && /account_id/.test(insertError.message)) {
+    delete orderRow.account_id;
+    ({ error: insertError } = await supabaseAdmin.from("orders").insert(orderRow));
+  }
   if (insertError) return res.status(500).json({ error: insertError.message });
   res.status(201).json({ ok: true, orderId: record.id });
 });
@@ -510,15 +564,32 @@ app.get("/api/export/inventory", auth, async (_req, res) => {
 app.patch("/api/orders/:id", auth, async (req, res) => {
   const validStatuses = ["new", "confirmed", "packed", "shipped", "completed", "cancelled"];
   const status = validStatuses.includes(req.body.status) ? req.body.status : null;
-  const { data, error } = status
-    ? await supabaseAdmin.from("orders").update({ status }).eq("id", req.params.id).select()
+  const patch = { status };
+  // Start the 7-day return window the first time an order is marked completed (delivered).
+  if (status === "completed") {
+    const { data: current } = await supabaseAdmin.from("orders").select("*").eq("id", req.params.id).limit(1);
+    if (current?.[0] && !current[0].delivered_at) patch.delivered_at = new Date().toISOString();
+  }
+  let { data, error } = status
+    ? await supabaseAdmin.from("orders").update(patch).eq("id", req.params.id).select()
     : await supabaseAdmin.from("orders").select("*").eq("id", req.params.id);
+  // Keep status updates working before the returns migration adds orders.delivered_at.
+  if (error && patch.delivered_at && /delivered_at/.test(error.message)) {
+    delete patch.delivered_at;
+    ({ data, error } = await supabaseAdmin.from("orders").update(patch).eq("id", req.params.id).select());
+  }
   if (error) return res.status(500).json({ error: error.message });
   if (!data.length) return res.status(404).json({ error: "Order not found" });
   res.json(fromOrderRow(data[0]));
 });
 
-app.use(express.static(ROOT));
+registerReturnRoutes(app, { db: supabaseAdmin, adminAuth: auth, customerAuth: customerAuthAny });
+
+if (supabaseAdmin.isLocal) app.use("/local-storage", express.static(supabaseAdmin.STORAGE_DIR));
+// Serve only the public site folders, never server.js, lib/, supabase/, scripts/ or package files.
+for (const name of ["assets", "store", "pages", "admin", "uploads"]) app.use(`/${name}`, express.static(path.join(ROOT, name)));
+for (const name of ["index.html", "style.css", "script.js", "robots.txt", "sitemap.xml"]) app.get(`/${name}`, (_req, res) => res.sendFile(path.join(ROOT, name)));
+app.get("/", (_req, res) => res.sendFile(path.join(ROOT, "index.html")));
 app.get("/admin", (_req, res) => res.sendFile(path.join(ROOT, "admin", "index.html")));
 if (!process.env.VERCEL) {
   ready.then(() => app.listen(PORT, () => console.log(`Mhow Organics running at http://localhost:${PORT}`)));
